@@ -1,20 +1,13 @@
 package rt.sagas.orderservice.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import rt.sagas.orderservice.Application;
 import rt.sagas.orderservice.entities.Order;
-
-import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -24,19 +17,7 @@ import static rt.sagas.orderservice.entities.OrderStatus.NEW;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-@AutoConfigureMockMvc
-public class OrderControllerTest {
-
-    @Autowired
-    private MockMvc mvc;
-
-    private static String convertToJson(Object object) throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(object);
-    }
-
-    private static <T> T convertToObject(String json, Class<T> clazz) throws IOException {
-        return new ObjectMapper().readValue(json, clazz);
-    }
+public class OrderControllerTest extends AbstractOrderControllerTest {
 
     @Test
     public void testOrderCreation() throws Exception {
@@ -107,4 +88,5 @@ public class OrderControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.message", equalTo("cartNumber must not be blank")));
     }
+
 }
