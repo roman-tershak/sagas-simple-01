@@ -3,7 +3,7 @@ package rt.sagas.orderservice;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import rt.sagas.orderservice.events.OrderCreated;
+import rt.sagas.events.OrderCreatedEvent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -11,18 +11,18 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class JmsReceiver {
 
-    private LinkedBlockingQueue<OrderCreated> events = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<OrderCreatedEvent> events = new LinkedBlockingQueue<>();
 
     @JmsListener(destination = "order.created")
-    public void receiveMessage(@Payload OrderCreated orderCreated) {
-        events.add(orderCreated);
+    public void receiveMessage(@Payload OrderCreatedEvent orderCreatedEvent) {
+        events.add(orderCreatedEvent);
     }
 
-    public OrderCreated pollEvent() throws InterruptedException {
+    public OrderCreatedEvent pollEvent() throws InterruptedException {
         return pollEvent(10000L);
     }
 
-    public OrderCreated pollEvent(long timeout) throws InterruptedException {
+    public OrderCreatedEvent pollEvent(long timeout) throws InterruptedException {
         return events.poll(timeout, TimeUnit.MILLISECONDS);
     }
 }

@@ -4,7 +4,7 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import rt.sagas.orderservice.events.OrderEvent;
+import rt.sagas.orderservice.entities.Order;
 import rt.sagas.orderservice.services.OrderEventsSender;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -20,7 +20,7 @@ public class TestConfiguration {
 
         doAnswer(invocationOnMock -> {
             return invocationOnMock.callRealMethod();
-        }).when(orderEventsSenderSpy).sendOrderEvent(any(OrderEvent.class));
+        }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
 
         return orderEventsSenderSpy;
     }

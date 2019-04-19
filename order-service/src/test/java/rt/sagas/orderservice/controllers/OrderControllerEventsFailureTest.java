@@ -8,9 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import rt.sagas.events.OrderCreatedEvent;
 import rt.sagas.orderservice.JmsReceiver;
 import rt.sagas.orderservice.entities.Order;
-import rt.sagas.orderservice.events.OrderCreated;
 import rt.sagas.orderservice.repositories.OrderRepository;
 import rt.sagas.orderservice.services.OrderEventsSender;
 
@@ -36,7 +36,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
     public void tearDown() {
         doAnswer(invocationOnMock -> {
             return invocationOnMock.callRealMethod();
-        }).when(orderEventsSenderSpy).sendOrderEvent(any(OrderCreated.class));
+        }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
         doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             throw new RuntimeException();
-        }).when(orderEventsSenderSpy).sendOrderEvent(any(OrderCreated.class));
+        }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
 
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -66,7 +66,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
                         new Order(17L, "1234567890123456"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
-        OrderCreated orderCreated = (OrderCreated) jmsReceiver.pollEvent();
+        OrderCreatedEvent orderCreated = jmsReceiver.pollEvent();
         assertThat(orderCreated, is(notNullValue()));
         assertThat(orderCreated.getUserId(), is(17L));
 

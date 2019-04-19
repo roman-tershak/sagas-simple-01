@@ -7,9 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import rt.sagas.events.OrderCreatedEvent;
 import rt.sagas.orderservice.JmsReceiver;
 import rt.sagas.orderservice.entities.Order;
-import rt.sagas.orderservice.events.OrderCreated;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -33,11 +33,11 @@ public class OrderControllerEventsTest extends AbstractOrderControllerTest {
                         new Order(17L, "1234567890123456"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
-        OrderCreated orderCreated = (OrderCreated) jmsReceiver.pollEvent();
-        assertThat(orderCreated, is(notNullValue()));
-        assertThat(orderCreated.getUserId(), is(17L));
-        assertThat(orderCreated.getCartNumber(), is("1234567890123456"));
-        assertThat(orderCreated.getOrderId(), is(notNullValue()));
+        OrderCreatedEvent orderCreatedEvent = jmsReceiver.pollEvent();
+        assertThat(orderCreatedEvent, is(notNullValue()));
+        assertThat(orderCreatedEvent.getUserId(), is(17L));
+        assertThat(orderCreatedEvent.getCartNumber(), is("1234567890123456"));
+        assertThat(orderCreatedEvent.getOrderId(), is(notNullValue()));
 
     }
 

@@ -1,4 +1,4 @@
-package rt.sagas.orderservice.events;
+package rt.sagas.events;
 
 import java.io.Serializable;
 
