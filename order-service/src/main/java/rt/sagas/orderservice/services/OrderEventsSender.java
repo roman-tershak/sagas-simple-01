@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.OrderCreatedEvent;
 import rt.sagas.orderservice.entities.Order;
 
+import static rt.sagas.events.QueueNames.ORDER_QUEUE_NAME;
+
 @Component
 public class OrderEventsSender {
 
@@ -19,6 +21,6 @@ public class OrderEventsSender {
         orderCreatedEvent.setUserId( orderCreated.getUserId() );
         orderCreatedEvent.setCartNumber( orderCreated.getCartNumber() );
 
-        jmsTemplate.convertAndSend("order.created", orderCreatedEvent);
+        jmsTemplate.convertAndSend(ORDER_QUEUE_NAME, orderCreatedEvent);
     }
 }

@@ -19,6 +19,7 @@ public class Order {
     private Long userId;
     private String cartNumber;
     private OrderStatus status = NEW;
+    private String reservationId;
 
     public Order() {
     }
@@ -47,4 +48,27 @@ public class Order {
         return status;
     }
 
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public String getReservationId() {
+        return this.reservationId;
+    }
+
+    public void setReservationId(String reservationId) {
+        this.reservationId = reservationId;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Order{");
+        sb.append("id=").append(id);
+        sb.append(", userId=").append(userId);
+        sb.append(", cartNumber='").append(cartNumber).append('\'');
+        sb.append(", status=").append(status);
+        sb.append(", reservationId='").append(reservationId).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

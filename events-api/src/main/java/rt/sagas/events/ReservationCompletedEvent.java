@@ -1,18 +1,26 @@
 package rt.sagas.events;
 
-public class OrderCreatedEvent extends OrderEvent {
+public class ReservationCompletedEvent {
 
+    private String reservationId;
     private Long orderId;
     private Long userId;
-    private String cartNumber;
 
-    public OrderCreatedEvent() {
+    public ReservationCompletedEvent() {
     }
 
-    public OrderCreatedEvent(Long orderId, Long userId, String cartNumber) {
+    public ReservationCompletedEvent(String reservationId, Long orderId, Long userId) {
+        this.reservationId = reservationId;
         this.orderId = orderId;
         this.userId = userId;
-        this.cartNumber = cartNumber;
+    }
+
+    public String getReservationId() {
+        return reservationId;
+    }
+
+    public void setReservationId(String reservationId) {
+        this.reservationId = reservationId;
     }
 
     public Long getOrderId() {
@@ -29,13 +37,5 @@ public class OrderCreatedEvent extends OrderEvent {
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public String getCartNumber() {
-        return cartNumber;
-    }
-
-    public void setCartNumber(String cartNumber) {
-        this.cartNumber = cartNumber;
     }
 }
