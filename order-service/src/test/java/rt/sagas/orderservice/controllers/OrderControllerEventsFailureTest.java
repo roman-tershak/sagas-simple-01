@@ -1,5 +1,6 @@
 package rt.sagas.orderservice.controllers;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,13 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
     private OrderRepository orderRepository;
     @Autowired
     private OrderEventsSender orderEventsSenderSpy;
+
+    @After
+    public void tearDown() {
+        doAnswer(invocationOnMock -> {
+            return invocationOnMock.callRealMethod();
+        }).when(orderEventsSenderSpy).sendOrderEvent(any(OrderCreated.class));
+    }
 
     @Test
     public void testOrderCreatedEventIsNotSentWhenTransactionIsRolledBack() throws Exception {
