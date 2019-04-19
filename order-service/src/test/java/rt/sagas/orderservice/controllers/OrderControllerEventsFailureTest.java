@@ -1,13 +1,9 @@
 package rt.sagas.orderservice.controllers;
 
-import org.junit.AfterClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -17,9 +13,7 @@ import rt.sagas.orderservice.events.OrderCreated;
 import rt.sagas.orderservice.repositories.OrderRepository;
 import rt.sagas.orderservice.services.OrderEventsSender;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -34,22 +28,16 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
     private JmsReceiver jmsReceiver;
     @Autowired
     private OrderRepository orderRepository;
-    @SpyBean
-    private OrderEventsSender orderEventsSender;
+    @Autowired
+    private OrderEventsSender orderEventsSenderSpy;
 
-    @AfterClass
-    public static void afterSuite() {
-        Mockito.reset();
-    }
-
-    @Ignore
     @Test
     public void testOrderCreatedEventIsNotSentWhenTransactionIsRolledBack() throws Exception {
 
         doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             throw new RuntimeException();
-        }).when(orderEventsSender).sendOrderEvent(any(OrderCreated.class));
+        }).when(orderEventsSenderSpy).sendOrderEvent(any(OrderCreated.class));
 
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -63,10 +51,6 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
 
     @Test
     public void testOrderCreatedEventIsSentWhenTransactionIsNotRolledBack() throws Exception {
-
-        doAnswer(invocationOnMock -> {
-            return invocationOnMock.callRealMethod();
-        }).when(orderEventsSender).sendOrderEvent(any(OrderCreated.class));
 
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)

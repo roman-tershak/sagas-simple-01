@@ -8,6 +8,3 @@ spring:
   activemq:
     broker-url: vm://embedded-broker?broker.persistent=false&broker.useShutdownHook=false
     in-memory: true
-    packages:
-      trust-all: false
-      trusted: rt.sagas
