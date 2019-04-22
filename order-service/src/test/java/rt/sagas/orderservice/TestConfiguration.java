@@ -15,11 +15,11 @@ public class TestConfiguration {
 
     @Primary
     @Bean
-    public OrderEventsSender getOrderEventsSenderSpy(OrderEventsSender orderEventsSender) {
+    public OrderEventsSender orderEventsSenderSpy(OrderEventsSender orderEventsSender) {
         OrderEventsSender orderEventsSenderSpy = Mockito.spy(orderEventsSender);
 
-        doAnswer(invocationOnMock -> {
-            return invocationOnMock.callRealMethod();
+        doAnswer(invocation -> {
+            return invocation.callRealMethod();
         }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
 
         return orderEventsSenderSpy;

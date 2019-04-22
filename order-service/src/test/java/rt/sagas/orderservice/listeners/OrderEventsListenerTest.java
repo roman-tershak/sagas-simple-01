@@ -12,8 +12,7 @@ import rt.sagas.orderservice.entities.Order;
 import rt.sagas.orderservice.entities.OrderStatus;
 import rt.sagas.orderservice.repositories.OrderRepository;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static rt.sagas.events.QueueNames.RESERVATION_QUEUE_NAME;
 
@@ -42,13 +41,36 @@ public class OrderEventsListenerTest {
         final String reservationId = "ABCDEF-1234-8765-UVWXYZ";
 
         ReservationCompletedEvent reservationCompletedEvent = new ReservationCompletedEvent(
-                reservationId, orderId, USER_ID
-        );
+                reservationId, orderId, USER_ID);
 
         jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCompletedEvent);
 
-        long stop = System.currentTimeMillis() + 10000L;
-        Order order = null;
+        Order order = waitTillCompletedAndGetOrderFromDb(5000L);
+
+        assertThat(order.getStatus(), is(OrderStatus.COMPLETE));
+        assertThat(order.getUserId(), is(USER_ID));
+        assertThat(order.getReservationId(), is(reservationId));
+    }
+
+    @Test
+    public void testOrderDoesNotBecomeCompletedWhenExceptionIsThrownOnReservationFinalizedEvent() throws Exception {
+        final String reservationId = "ABCDEF-1234-8765-UVWXYZ";
+
+        ReservationCompletedEvent reservationCompletedEvent = new ReservationCompletedEvent(
+                reservationId, orderId, 999L);
+
+        jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCompletedEvent);
+
+        Order order = waitTillCompletedAndGetOrderFromDb(10000L);
+
+        assertThat(order.getStatus(), is(OrderStatus.NEW));
+        assertThat(order.getUserId(), is(USER_ID));
+        assertThat(order.getReservationId(), is(nullValue()));
+    }
+
+    private Order waitTillCompletedAndGetOrderFromDb(long waitTimeout) throws InterruptedException {
+        long stop = System.currentTimeMillis() + waitTimeout;
+        Order order;
         do {
             order = orderRepository.findById(orderId).get();
             System.out.println(order);
@@ -59,11 +81,8 @@ public class OrderEventsListenerTest {
             } else {
                 Thread.sleep(100L);
             }
-
         } while (System.currentTimeMillis() < stop);
 
-        assertThat(order.getStatus(), is(OrderStatus.COMPLETE));
-        assertThat(order.getUserId(), is(USER_ID));
-        assertThat(order.getReservationId(), is(reservationId));
+        return order;
     }
 }

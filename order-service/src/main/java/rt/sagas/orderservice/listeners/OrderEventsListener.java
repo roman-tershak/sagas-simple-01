@@ -29,6 +29,10 @@ public class OrderEventsListener {
         if (optionalOrder.isPresent()) {
 
             Order order = optionalOrder.get();
+
+            if (order.getUserId() != reservationCompletedEvent.getUserId()) {
+                throw new RuntimeException();
+            }
             order.setReservationId(reservationCompletedEvent.getReservationId());
             order.setStatus(OrderStatus.COMPLETE);
 
