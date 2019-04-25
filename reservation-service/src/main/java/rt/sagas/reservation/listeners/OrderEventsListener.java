@@ -43,7 +43,7 @@ public class OrderEventsListener {
 
             jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
         } else {
-            // TODO ignore for now
+
         }
     }
 }

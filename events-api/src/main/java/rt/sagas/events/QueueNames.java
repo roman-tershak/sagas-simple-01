@@ -6,6 +6,7 @@ public interface QueueNames {
 
     String RESERVATION_CREATED_EVENT_QUEUE = "reservation.created.event.queue";
     String RESERVATION_CONFIRMED_EVENT_QUEUE = "reservation.confirmed.event.queue";
+    String RESERVATION_ERROR_EVENT_QUEUE = "reservation.error.event.queue";
 
     String CART_AUTHORIZED_EVENT_QUEUE = "cart.authorized.event.queue";
 }

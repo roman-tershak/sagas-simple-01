@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.CartAuthorizedEvent;
 import rt.sagas.events.QueueNames;
 import rt.sagas.events.ReservationConfirmedEvent;
+import rt.sagas.events.ReservationErrorEvent;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
@@ -44,7 +45,11 @@ public class CartEvensListener {
 
             jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
         } else {
-            //TODO ignore for now
+            ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
+                    reservationId, orderId, userId, cartAuthorizedEvent.getCartNumber(),
+                    "The Reservation '" + reservationId + "' does not exist");
+
+            jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
         }
     }
 }
