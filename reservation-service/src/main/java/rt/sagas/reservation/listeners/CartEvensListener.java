@@ -13,6 +13,7 @@ import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
 import javax.transaction.Transactional;
+import java.util.Objects;
 import java.util.Optional;
 
 import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
@@ -36,14 +37,28 @@ public class CartEvensListener {
         Optional<Reservation> optional = reservationRepository.findById(reservationId);
         if (optional.isPresent()) {
             Reservation reservation = optional.get();
-            reservation.setStatus(CONFIRMED);
+            Long reservationOrderId = reservation.getOrderId();
+            Long reservationUserId = reservation.getUserId();
 
-            reservationRepository.save(reservation);
+            if (Objects.equals(reservationOrderId, orderId) &&
+                    Objects.equals(reservationUserId, userId)) {
 
-            ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
-                    reservationId, orderId, userId);
+                reservation.setStatus(CONFIRMED);
 
-            jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+                reservationRepository.save(reservation);
+
+                ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
+                        reservationId, orderId, userId);
+
+                jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+            } else {
+                ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
+                        reservationId, reservationOrderId, reservationUserId, cartAuthorizedEvent.getCartNumber(),
+                        "The Reservation attributes (" + orderId + ", " + userId + ") do not match");
+
+                jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
+            }
+
         } else {
             ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
                     reservationId, orderId, userId, cartAuthorizedEvent.getCartNumber(),

@@ -103,4 +103,26 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         assertThat(reservationErrorEvent.getCartNumber(), is(CART_NUMBER));
         assertThat(reservationErrorEvent.getMessage(), containsString("The Reservation 'not-existing-reservation' does not exist"));
     }
+
+    @Test
+    public void testReservationErrorEventIsSentWhenAttributesDoNotMatch() throws Exception {
+        Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
+        reservationRepository.save(pendingReservation);
+        String reservationId = pendingReservation.getId();
+
+        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
+                reservationId, CART_NUMBER, 99999L, 999L);
+        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+
+        ReservationConfirmedEvent reservationConfirmedEvent = reservationConfirmedEventReceiver.pollEvent(5000L);
+        assertThat(reservationConfirmedEvent, is(nullValue()));
+
+        ReservationErrorEvent reservationErrorEvent = reservationErrorEventReceiver.pollEvent(5000L);
+        assertThat(reservationErrorEvent, is(notNullValue()));
+        assertThat(reservationErrorEvent.getReservationId(), is(reservationId));
+        assertThat(reservationErrorEvent.getOrderId(), is(ORDER_ID));
+        assertThat(reservationErrorEvent.getUserId(), is(USER_ID));
+        assertThat(reservationErrorEvent.getCartNumber(), is(CART_NUMBER));
+        assertThat(reservationErrorEvent.getMessage(), containsString("The Reservation attributes (99999, 999) do not match"));
+    }
 }
