@@ -8,7 +8,7 @@ import java.util.Optional;
 public class OrderRepositorySpy implements OrderRepository {
 
     private OrderRepository orderRepository;
-    private boolean throwExceptionInSave = false;
+    private static boolean throwExceptionInSave = false;
 
     public OrderRepositorySpy(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;

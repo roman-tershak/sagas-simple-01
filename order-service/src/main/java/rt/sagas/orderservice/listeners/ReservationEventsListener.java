@@ -15,7 +15,7 @@ import java.util.Optional;
 import static rt.sagas.events.QueueNames.RESERVATION_QUEUE_NAME;
 
 @Component
-public class OrderEventsListener {
+public class ReservationEventsListener {
 
     @Autowired
     private OrderRepository orderRepository;
@@ -30,17 +30,13 @@ public class OrderEventsListener {
 
             Order order = optionalOrder.get();
 
-            if (order.getUserId() != reservationCompletedEvent.getUserId()) {
-                throw new RuntimeException();
+            if (order.getUserId() == reservationCompletedEvent.getUserId()) {
+                order.setReservationId(reservationCompletedEvent.getReservationId());
+                order.setStatus(OrderStatus.COMPLETE);
+
+                orderRepository.save(order);
             }
-            order.setReservationId(reservationCompletedEvent.getReservationId());
-            order.setStatus(OrderStatus.COMPLETE);
-
-            orderRepository.save(order);
-        } else {
-            throw new RuntimeException();
         }
-
     }
 
 }

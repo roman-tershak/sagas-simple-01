@@ -22,6 +22,14 @@
             <groupId>rt.sagas</groupId>
             <artifactId>events-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>rt.sagas</groupId>
+            <artifactId>test-utils</artifactId>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -10,44 +10,27 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reservation-service</artifactId>
+    <artifactId>test-utils</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>rt.sagas</groupId>
             <artifactId>events-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>rt.sagas</groupId>
-            <artifactId>test-utils</artifactId>
-            <type>test-jar</type>
-            <classifier>tests</classifier>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>repackage</goal>
+                            <goal>test-jar</goal>
                         </goals>
-                        <configuration>
-                            <classifier>spring-boot</classifier>
-                            <mainClass>
-                                rt.sagas.reservation.Application
-                            </mainClass>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

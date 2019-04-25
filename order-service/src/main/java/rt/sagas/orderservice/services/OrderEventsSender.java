@@ -16,10 +16,10 @@ public class OrderEventsSender {
 
     public void sendOrderCreatedEvent(Order orderCreated) {
 
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent();
-        orderCreatedEvent.setOrderId( orderCreated.getId() );
-        orderCreatedEvent.setUserId( orderCreated.getUserId() );
-        orderCreatedEvent.setCartNumber( orderCreated.getCartNumber() );
+        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
+                orderCreated.getId(),
+                orderCreated.getUserId(),
+                orderCreated.getCartNumber());
 
         jmsTemplate.convertAndSend(ORDER_QUEUE_NAME, orderCreatedEvent);
     }
