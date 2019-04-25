@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.OrderCreatedEvent;
-import rt.sagas.orderservice.JmsOrderEventsReceiver;
+import rt.sagas.orderservice.JmsOrderCreatedEventReceiver;
 import rt.sagas.orderservice.entities.Order;
 import rt.sagas.orderservice.repositories.OrderRepository;
 import rt.sagas.orderservice.services.OrderEventsSender;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class OrderControllerEventsFailureTest extends AbstractOrderControllerTest {
 
     @Autowired
-    private JmsOrderEventsReceiver jmsOrderEventsReceiver;
+    private JmsOrderCreatedEventReceiver jmsOrderCreatedEventReceiver;
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
@@ -53,7 +53,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
                         new Order(17L, "1234567890123456"))))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        assertThat(jmsOrderEventsReceiver.pollEvent(5000L), is(nullValue()));
+        assertThat(jmsOrderCreatedEventReceiver.pollEvent(5000L), is(nullValue()));
         assertThat(orderRepository.count(), is(0L));
     }
 
@@ -66,7 +66,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
                         new Order(17L, "1234567890123456"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
-        OrderCreatedEvent orderCreated = jmsOrderEventsReceiver.pollEvent();
+        OrderCreatedEvent orderCreated = jmsOrderCreatedEventReceiver.pollEvent();
         assertThat(orderCreated, is(notNullValue()));
         assertThat(orderCreated.getUserId(), is(17L));
 

@@ -8,14 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import rt.sagas.events.ReservationCompletedEvent;
+import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.orderservice.OrderRepositorySpy;
 import rt.sagas.orderservice.entities.Order;
 import rt.sagas.orderservice.entities.OrderStatus;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static rt.sagas.events.QueueNames.RESERVATION_QUEUE_NAME;
+import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,10 +47,10 @@ public class ReservationEventsListenerTest {
 
     @Test
     public void testOrderBecomesCompletedOnReservationFinalizedEvent() throws Exception {
-        ReservationCompletedEvent reservationCompletedEvent = new ReservationCompletedEvent(
+        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCompletedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
@@ -61,10 +61,10 @@ public class ReservationEventsListenerTest {
 
     @Test
     public void testOrderDoesNotBecomeCompletedWhenHandlingOfReservationFinalizedEventFails() throws Exception {
-        ReservationCompletedEvent reservationCompletedEvent = new ReservationCompletedEvent(
+        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, 999L);
 
-        jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCompletedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
@@ -77,10 +77,10 @@ public class ReservationEventsListenerTest {
     public void testOrderDoesNotBecomeCompleteWhenExceptionIsThrownOnReservationFinalizedEvent() throws Exception {
         orderRepositorySpy.setThrowExceptionInSave(true);
 
-        ReservationCompletedEvent reservationCompletedEvent = new ReservationCompletedEvent(
+        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCompletedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 

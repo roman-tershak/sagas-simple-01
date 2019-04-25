@@ -14,8 +14,8 @@ import rt.sagas.reservation.repositories.ReservationRepository;
 import javax.transaction.Transactional;
 import java.util.List;
 
-import static rt.sagas.events.QueueNames.ORDER_QUEUE_NAME;
-import static rt.sagas.events.QueueNames.RESERVATION_QUEUE_NAME;
+import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
+import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
 public class OrderEventsListener {
@@ -28,7 +28,7 @@ public class OrderEventsListener {
     private JmsTemplate jmsTemplate;
 
     @Transactional
-    @JmsListener(destination = ORDER_QUEUE_NAME)
+    @JmsListener(destination = ORDER_CREATED_EVENT_QUEUE)
     public void receiveMessage(@Payload OrderCreatedEvent orderCreatedEvent) {
         Long orderId = orderCreatedEvent.getOrderId();
         Long userId = orderCreatedEvent.getUserId();
@@ -41,7 +41,7 @@ public class OrderEventsListener {
             ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
                     reservation.getId(), orderId, userId, orderCreatedEvent.getCartNumber());
 
-            jmsTemplate.convertAndSend(RESERVATION_QUEUE_NAME, reservationCreatedEvent);
+            jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
         } else {
             // TODO ignore for now
         }

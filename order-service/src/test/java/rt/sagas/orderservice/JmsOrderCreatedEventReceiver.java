@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.OrderCreatedEvent;
 import rt.sagas.testutils.JmsReceiver;
 
-import static rt.sagas.events.QueueNames.ORDER_QUEUE_NAME;
+import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
 
 @Component
-public class JmsOrderEventsReceiver extends JmsReceiver<OrderCreatedEvent> {
+public class JmsOrderCreatedEventReceiver extends JmsReceiver<OrderCreatedEvent> {
 
-    @JmsListener(destination = ORDER_QUEUE_NAME)
+    @JmsListener(destination = ORDER_CREATED_EVENT_QUEUE)
     @Override
     public void receiveMessage(@Payload OrderCreatedEvent orderCreatedEvent) {
         addEvent(orderCreatedEvent);

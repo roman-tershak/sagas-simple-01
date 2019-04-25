@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.ReservationCreatedEvent;
 import rt.sagas.testutils.JmsReceiver;
 
-import static rt.sagas.events.QueueNames.RESERVATION_QUEUE_NAME;
+import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
-public class JmsReservationEventsReceiver extends JmsReceiver<ReservationCreatedEvent> {
+public class JmsReservationCreatedEventReceiver extends JmsReceiver<ReservationCreatedEvent> {
 
-    @JmsListener(destination = RESERVATION_QUEUE_NAME)
+    @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
     @Override
     public void receiveMessage(@Payload ReservationCreatedEvent reservationCreatedEvent) {
         addEvent(reservationCreatedEvent);

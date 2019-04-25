@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.OrderCreatedEvent;
-import rt.sagas.orderservice.JmsOrderEventsReceiver;
+import rt.sagas.orderservice.JmsOrderCreatedEventReceiver;
 import rt.sagas.orderservice.entities.Order;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class OrderControllerEventsTest extends AbstractOrderControllerTest {
 
     @Autowired
-    private JmsOrderEventsReceiver jmsOrderEventsReceiver;
+    private JmsOrderCreatedEventReceiver jmsOrderCreatedEventReceiver;
 
     @Test
     public void testOrderCreatedEventSentOnOrderCreation() throws Exception {
@@ -33,7 +33,7 @@ public class OrderControllerEventsTest extends AbstractOrderControllerTest {
                         new Order(17L, "1234567890123456"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
-        OrderCreatedEvent orderCreatedEvent = jmsOrderEventsReceiver.pollEvent();
+        OrderCreatedEvent orderCreatedEvent = jmsOrderCreatedEventReceiver.pollEvent();
         assertThat(orderCreatedEvent, is(notNullValue()));
         assertThat(orderCreatedEvent.getUserId(), is(17L));
         assertThat(orderCreatedEvent.getCartNumber(), is("1234567890123456"));
