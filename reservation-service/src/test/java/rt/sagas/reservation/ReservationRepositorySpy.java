@@ -2,6 +2,7 @@ package rt.sagas.reservation;
 
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
+import rt.sagas.testutils.TestRuntimeException;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class ReservationRepositorySpy implements ReservationRepository {
     public <S extends Reservation> S save(S s) {
         S saved = reservationRepository.save(s);
         if (throwExceptionInSave)
-            throw new RuntimeException("Intended exception - ignore");
+            throw new TestRuntimeException("Intended exception - ignore");
         return saved;
     }
 

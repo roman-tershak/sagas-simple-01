@@ -10,6 +10,9 @@
     <modules>
         <module>../events-api</module>
         <module>../test-utils</module>
+        <module>../order-service</module>
+        <module>../reservation-service</module>
+        <module>../cart-service</module>
     </modules>
     <packaging>pom</packaging>
 

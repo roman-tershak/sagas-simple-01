@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.CartAuthorizedEvent;
@@ -25,7 +24,6 @@ import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Configuration
 public class CartEventsListenerTest extends AbstractListenerTest {
 
     public static final Long ORDER_ID = 15L;

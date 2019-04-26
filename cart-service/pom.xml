@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>order-service</artifactId>
+    <artifactId>cart-service</artifactId>
 
     <dependencies>
         <dependency>
@@ -45,7 +45,7 @@
                         <configuration>
                             <classifier>spring-boot</classifier>
                             <mainClass>
-                                rt.sagas.order.Application
+                                rt.sagas.cart.Application
                             </mainClass>
                         </configuration>
                     </execution>
