@@ -44,7 +44,6 @@ public class CartEvensListener {
                     Objects.equals(reservationUserId, userId)) {
 
                 reservation.setStatus(CONFIRMED);
-
                 reservationRepository.save(reservation);
 
                 ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(

@@ -2,9 +2,11 @@ package rt.sagas.reservation.listeners;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import rt.sagas.reservation.entities.Reservation;
+import rt.sagas.reservation.entities.ReservationStatus;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class AbstractListenerTest {
 
@@ -15,17 +17,40 @@ public class AbstractListenerTest {
         reservationRepository.deleteAll();
     }
 
-    protected List<Reservation> waitAndGetReservationsByOrderIdFromDb(Long orderId, long waitTimeout) throws Exception {
+    protected Reservation waitAndGetReservationsByOrderIdAndStatusFromDb(
+            Long orderId, ReservationStatus status, long waitTimeout) throws Exception {
+
         long stop = System.currentTimeMillis() + waitTimeout;
-        List<Reservation> reservations;
         do {
-            reservations = reservationRepository.findAllByOrderId(orderId);
-            if (reservations.size() > 0)
-                break;
-            else
-                Thread.sleep(100L);
+            for (Reservation r : reservationRepository.findAllByOrderId(orderId)) {
+                if (Objects.equals(r.getStatus(), status)) {
+                    return r;
+                } else {
+                    Thread.sleep(100L);
+                }
+            }
         } while (System.currentTimeMillis() < stop);
 
-        return reservations;
+        return null;
+    }
+
+    protected Reservation waitAndGetReservationsByIdAndStatusFromDb(
+            String reservationId, ReservationStatus status, long waitTimeout) throws Exception {
+
+        long stop = System.currentTimeMillis() + waitTimeout;
+        do {
+            Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
+            if (optionalReservation.isPresent()) {
+                Reservation reservation = optionalReservation.get();
+
+                if (Objects.equals(reservation.getStatus(), status)) {
+                    return reservation;
+                } else {
+                    Thread.sleep(100L);
+                }
+            }
+        } while (System.currentTimeMillis() < stop);
+
+        return null;
     }
 }

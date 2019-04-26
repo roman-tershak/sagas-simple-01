@@ -42,27 +42,14 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
     }
 
     @Test
-    public void testPendingReservationIsCreatedOnOrderCreatedEvent() throws Exception {
+    public void testPendingReservationIsCreatedAndReservationCreatedEventIsSentOnOrderCreatedEvent() throws Exception {
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER);
         jmsTemplate.convertAndSend(QueueNames.ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
 
-        List<Reservation> reservations = waitAndGetReservationsByOrderIdFromDb(ORDER_ID, 10000L);
-        assertThat(reservations.size(), is(1));
-
-        Reservation reservation = reservations.get(0);
+        Reservation reservation = waitAndGetReservationsByOrderIdAndStatusFromDb(
+                ORDER_ID, PENDING, 10000L);
         assertThat(reservation.getOrderId(), is(ORDER_ID));
         assertThat(reservation.getUserId(), is(USER_ID));
-        assertThat(reservation.getStatus(), is(PENDING));
-    }
-
-    @Test
-    public void testReservationCreatedEventIsSentOnOrderCreatedEvent() throws Exception {
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER);
-        jmsTemplate.convertAndSend(QueueNames.ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
-
-        List<Reservation> reservations = waitAndGetReservationsByOrderIdFromDb(ORDER_ID, 10000L);
-        assertThat(reservations.size(), is(1));
-        Reservation reservation = reservations.get(0);
 
         ReservationCreatedEvent reservationCreatedEvent = reservationCreatedEventReceiver.pollEvent(5000L);
         assertThat(reservationCreatedEvent, is(notNullValue()));

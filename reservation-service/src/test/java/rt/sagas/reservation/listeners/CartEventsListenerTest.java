@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.CartAuthorizedEvent;
@@ -13,17 +14,18 @@ import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.events.ReservationErrorEvent;
 import rt.sagas.reservation.JmsReservationConfirmedEventReceiver;
 import rt.sagas.reservation.JmsReservationErrorEventReceiver;
+import rt.sagas.reservation.ReservationRepositorySpy;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
-
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static rt.sagas.reservation.entities.ReservationStatus.CONFIRMED;
+import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Configuration
 public class CartEventsListenerTest extends AbstractListenerTest {
 
     public static final Long ORDER_ID = 15L;
@@ -33,6 +35,8 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     @Autowired
     private ReservationFactory reservationFactory;
     @Autowired
+    private ReservationRepositorySpy reservationRepositorySpy;
+    @Autowired
     private JmsTemplate jmsTemplate;
     @Autowired
     private JmsReservationConfirmedEventReceiver reservationConfirmedEventReceiver;
@@ -40,29 +44,34 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     private JmsReservationErrorEventReceiver reservationErrorEventReceiver;
 
     @After
+    public void setUp() {
+        reservationRepositorySpy.setThrowExceptionInSave(false);
+    }
+
+    @After
     public void tearDown() {
+        reservationRepositorySpy.setThrowExceptionInSave(false);
         super.tearDown();
         reservationConfirmedEventReceiver.clear();
+        reservationErrorEventReceiver.clear();
     }
 
     @Test
     public void testReservationGetsCompletedWhenCartApprovedEventIsReceived() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);
+        String reservationId = pendingReservation.getId();
 
         CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
-                pendingReservation.getId(),
+                reservationId,
                 CART_NUMBER, ORDER_ID, USER_ID);
         jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
-        List<Reservation> reservations = waitAndGetReservationsByOrderIdFromDb(ORDER_ID, 5000L);
-        assertThat(reservations.size(), is(1));
-
-        Reservation reservation = reservations.get(0);
-        assertThat(reservation.getId(), is(pendingReservation.getId()));
+        Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(
+                reservationId, CONFIRMED, 5000L);
+        assertThat(reservation, is(notNullValue()));
         assertThat(reservation.getOrderId(), is(ORDER_ID));
         assertThat(reservation.getUserId(), is(USER_ID));
-        assertThat(reservation.getStatus(), is(CONFIRMED));
     }
 
     @Test
@@ -124,5 +133,28 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         assertThat(reservationErrorEvent.getUserId(), is(USER_ID));
         assertThat(reservationErrorEvent.getCartNumber(), is(CART_NUMBER));
         assertThat(reservationErrorEvent.getMessage(), containsString("The Reservation attributes (99999, 999) do not match"));
+    }
+
+    @Test
+    public void testReservationConfirmedEventIsNotSentWhenExceptionOccurs() throws Exception {
+        Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
+        reservationRepository.save(pendingReservation);
+        String reservationId = pendingReservation.getId();
+
+        reservationRepositorySpy.setThrowExceptionInSave(true);
+
+        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
+                reservationId,
+                CART_NUMBER, ORDER_ID, USER_ID);
+        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+
+        assertThat(reservationConfirmedEventReceiver.pollEvent(5000L), is(nullValue()));
+        assertThat(reservationErrorEventReceiver.pollEvent(1000L), is(nullValue()));
+
+        Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(
+                reservationId, PENDING, 0);
+        assertThat(reservation, is(notNullValue()));
+        assertThat(reservation.getOrderId(), is(ORDER_ID));
+        assertThat(reservation.getUserId(), is(USER_ID));
     }
 }
