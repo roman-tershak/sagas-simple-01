@@ -12,7 +12,7 @@ import rt.sagas.order.repositories.OrderRepository;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
-import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
+import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 
 @Component
 public class ReservationEventsListener {
@@ -21,7 +21,7 @@ public class ReservationEventsListener {
     private OrderRepository orderRepository;
 
     @Transactional
-    @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
+    @JmsListener(destination = RESERVATION_CONFIRMED_EVENT_QUEUE)
     public void receiveMessage(@Payload ReservationConfirmedEvent reservationConfirmedEvent) {
         final Long orderId = reservationConfirmedEvent.getOrderId();
 

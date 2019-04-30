@@ -15,7 +15,7 @@ import rt.sagas.order.entities.OrderStatus;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
+import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -50,7 +50,7 @@ public class ReservationEventsListenerTest {
         ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
@@ -64,7 +64,7 @@ public class ReservationEventsListenerTest {
         ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, 999L);
 
-        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
@@ -80,7 +80,7 @@ public class ReservationEventsListenerTest {
         ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
