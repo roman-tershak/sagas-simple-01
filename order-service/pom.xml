@@ -24,6 +24,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>rt.sagas</groupId>
             <artifactId>test-utils</artifactId>
             <type>test-jar</type>
@@ -50,6 +55,27 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.3</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>saga-tests-simple-1/${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <DIR_NAME>${project.artifactId}</DIR_NAME>
+                        <JAR_FILE>${project.build.finalName}-spring-boot.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
             </plugin>
         </plugins>
     </build>

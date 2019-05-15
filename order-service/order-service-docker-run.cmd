@@ -1,0 +1,1 @@
+docker run -ti --rm --name order-service --network vnet-saga-simple-1 saga-tests-simple-1/order-service:1.0-SNAPSHOT

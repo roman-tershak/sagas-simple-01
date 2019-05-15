@@ -1,0 +1,1 @@
+docker run -ti --rm --name reservation-service --network vnet-saga-simple-1 saga-tests-simple-1/reservation-service:1.0-SNAPSHOT
