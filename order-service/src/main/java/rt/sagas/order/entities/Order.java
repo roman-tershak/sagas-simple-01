@@ -1,9 +1,6 @@
 package rt.sagas.order.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -18,6 +15,7 @@ public class Order {
     private Long id;
     private Long userId;
     private String cartNumber;
+    @Enumerated(EnumType.STRING)
     private OrderStatus status = NEW;
     private String reservationId;
 

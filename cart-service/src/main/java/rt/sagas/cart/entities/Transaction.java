@@ -1,9 +1,6 @@
 package rt.sagas.cart.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity(name = "TRANSACTIONS")
 public class Transaction {
@@ -14,6 +11,7 @@ public class Transaction {
     private String cartNumber;
     private Long orderId;
     private Long userId;
+    @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
     public Transaction() {

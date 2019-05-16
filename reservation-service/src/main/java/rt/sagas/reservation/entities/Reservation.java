@@ -1,6 +1,8 @@
 package rt.sagas.reservation.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity(name = "RESERVATIONS")
@@ -10,6 +12,7 @@ public class Reservation {
     private String id;
     private Long orderId;
     private Long userId;
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     public Reservation() {
