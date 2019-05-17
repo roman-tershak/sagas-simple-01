@@ -1,5 +1,7 @@
 package rt.sagas.order.controllers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +14,8 @@ import javax.validation.Valid;
 @RestController("/orders")
 public class OrderController {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @Autowired
     private OrderService orderService;
 
@@ -19,6 +23,9 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public Order create(@RequestBody @Valid Order order) {
+
+        LOGGER.info("Create Order called: {}", order);
+
         return orderService.createOrder(order);
     }
 

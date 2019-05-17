@@ -26,4 +26,14 @@ public class ReservationEvent extends SagaEvent {
     public Long getUserId() {
         return userId;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ReservationEvent{");
+        sb.append("reservationId='").append(reservationId).append('\'');
+        sb.append(", orderId=").append(orderId);
+        sb.append(", userId=").append(userId);
+        sb.append('}');
+        return sb.toString();
+    }
 }

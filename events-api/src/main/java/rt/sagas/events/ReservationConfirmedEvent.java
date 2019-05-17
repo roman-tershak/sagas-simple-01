@@ -9,4 +9,11 @@ public class ReservationConfirmedEvent extends ReservationEvent {
         super(reservationId, orderId, userId);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ReservationConfirmedEvent{");
+        sb.append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
 }

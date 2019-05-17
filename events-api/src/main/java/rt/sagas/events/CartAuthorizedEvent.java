@@ -9,4 +9,11 @@ public class CartAuthorizedEvent extends CartEvent {
         super(reservationId, cartNumber, orderId, userId);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CartAuthorizedEvent{");
+        sb.append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
 }

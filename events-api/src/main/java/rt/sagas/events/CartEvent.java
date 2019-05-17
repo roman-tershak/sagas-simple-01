@@ -32,4 +32,15 @@ public class CartEvent extends SagaEvent {
     public Long getUserId() {
         return userId;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CartEvent{");
+        sb.append("reservationId='").append(reservationId).append('\'');
+        sb.append(", cartNumber='").append(cartNumber).append('\'');
+        sb.append(", orderId=").append(orderId);
+        sb.append(", userId=").append(userId);
+        sb.append('}');
+        return sb.toString();
+    }
 }

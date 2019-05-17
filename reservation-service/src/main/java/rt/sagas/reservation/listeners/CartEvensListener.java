@@ -1,5 +1,7 @@
 package rt.sagas.reservation.listeners;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -22,6 +24,8 @@ import static rt.sagas.reservation.entities.ReservationStatus.CONFIRMED;
 @Component
 public class CartEvensListener {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -30,6 +34,8 @@ public class CartEvensListener {
     @Transactional
     @JmsListener(destination = CART_AUTHORIZED_EVENT_QUEUE)
     public void receiveMessage(@Payload CartAuthorizedEvent cartAuthorizedEvent) {
+        LOGGER.info("Cart Authorized Event received: {}", cartAuthorizedEvent);
+
         String reservationId = cartAuthorizedEvent.getReservationId();
         Long orderId = cartAuthorizedEvent.getOrderId();
         Long userId = cartAuthorizedEvent.getUserId();
@@ -50,12 +56,16 @@ public class CartEvensListener {
                         reservationId, orderId, userId);
 
                 jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+
+                LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
             } else {
                 ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
                         reservationId, reservationOrderId, reservationUserId, cartAuthorizedEvent.getCartNumber(),
                         "The Reservation attributes (" + orderId + ", " + userId + ") do not match");
 
                 jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
+
+                LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
             }
 
         } else {
@@ -64,6 +74,8 @@ public class CartEvensListener {
                     "The Reservation '" + reservationId + "' does not exist");
 
             jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
+
+            LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
         }
     }
 }

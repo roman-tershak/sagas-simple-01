@@ -1,5 +1,7 @@
 package rt.sagas.reservation.listeners;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -20,6 +22,8 @@ import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 @Component
 public class OrderEventsListener {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @Autowired
     private ReservationFactory reservationFactory;
     @Autowired
@@ -30,6 +34,9 @@ public class OrderEventsListener {
     @Transactional
     @JmsListener(destination = ORDER_CREATED_EVENT_QUEUE)
     public void receiveMessage(@Payload OrderCreatedEvent orderCreatedEvent) {
+
+        LOGGER.info("Order Created Event received: {}", orderCreatedEvent);
+
         Long orderId = orderCreatedEvent.getOrderId();
         Long userId = orderCreatedEvent.getUserId();
 
@@ -42,8 +49,10 @@ public class OrderEventsListener {
                     reservation.getId(), orderId, userId, orderCreatedEvent.getCartNumber());
 
             jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
-        } else {
 
+            LOGGER.info("Reservation Created Event sent: {}", reservationCreatedEvent);
+        } else {
+            LOGGER.error("Reservations for Order Id {} has already been created", orderId);
         }
     }
 }

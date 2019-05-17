@@ -1,5 +1,7 @@
 package rt.sagas.order.listeners;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -17,6 +19,8 @@ import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 @Component
 public class ReservationEventsListener {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -24,6 +28,8 @@ public class ReservationEventsListener {
     @JmsListener(destination = RESERVATION_CONFIRMED_EVENT_QUEUE)
     public void receiveMessage(@Payload ReservationConfirmedEvent reservationConfirmedEvent) {
         final Long orderId = reservationConfirmedEvent.getOrderId();
+
+        LOGGER.info("Reservation Event Confirmed received: {}", reservationConfirmedEvent);
 
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isPresent()) {
@@ -35,7 +41,12 @@ public class ReservationEventsListener {
                 order.setStatus(OrderStatus.COMPLETE);
 
                 orderRepository.save(order);
+            } else {
+                LOGGER.error("Order does not match Reservation Confirmed Event: {}, {}",
+                        order, reservationConfirmedEvent);
             }
+        } else {
+            LOGGER.error("Order not found for Reservation Confirmed Event: {}", reservationConfirmedEvent);
         }
     }
 

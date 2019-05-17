@@ -22,4 +22,14 @@ public class ReservationErrorEvent extends ReservationEvent {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ReservationErrorEvent{");
+        sb.append("cartNumber='").append(cartNumber).append('\'');
+        sb.append(", message='").append(message).append('\'');
+        sb.append(", ").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
 }

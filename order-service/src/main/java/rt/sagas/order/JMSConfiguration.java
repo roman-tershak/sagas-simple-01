@@ -44,6 +44,7 @@ public class JMSConfiguration {
     protected ActiveMQConnectionFactory activeMQConnectionFactory() {
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setBrokerURL(brokerUrl);
+        System.out.println(brokerUrl);
         return activeMQConnectionFactory;
     }
 

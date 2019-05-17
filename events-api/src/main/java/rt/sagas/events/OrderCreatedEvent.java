@@ -26,4 +26,14 @@ public class OrderCreatedEvent extends OrderEvent {
     public String getCartNumber() {
         return cartNumber;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("OrderCreatedEvent{");
+        sb.append("orderId=").append(orderId);
+        sb.append(", userId=").append(userId);
+        sb.append(", cartNumber='").append(cartNumber).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

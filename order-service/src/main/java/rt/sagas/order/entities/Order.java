@@ -8,6 +8,7 @@ import javax.validation.constraints.Positive;
 import static rt.sagas.order.entities.OrderStatus.NEW;
 
 @Entity(name = "ORDERS")
+
 public class Order {
 
     @Id
