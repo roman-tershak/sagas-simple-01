@@ -60,20 +60,6 @@ public class ReservationEventsListenerTest {
     }
 
     @Test
-    public void testOrderDoesNotBecomeCompletedWhenHandlingOfReservationFinalizedEventFails() throws Exception {
-        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
-                RESERVATION_ID, orderId, 999L);
-
-        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
-
-        Order order = waitTillCompletedAndGetOrderFromDb(5000L);
-
-        assertThat(order.getStatus(), is(OrderStatus.NEW));
-        assertThat(order.getUserId(), is(USER_ID));
-        assertThat(order.getReservationId(), is(nullValue()));
-    }
-
-    @Test
     public void testOrderDoesNotBecomeCompleteWhenExceptionIsThrownOnReservationFinalizedEvent() throws Exception {
         orderRepositorySpy.setThrowExceptionInSave(true);
 

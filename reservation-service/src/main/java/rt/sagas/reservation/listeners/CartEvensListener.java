@@ -15,7 +15,6 @@ import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
 import javax.transaction.Transactional;
-import java.util.Objects;
 import java.util.Optional;
 
 import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
@@ -37,45 +36,40 @@ public class CartEvensListener {
         LOGGER.info("Cart Authorized Event received: {}", cartAuthorizedEvent);
 
         String reservationId = cartAuthorizedEvent.getReservationId();
-        Long orderId = cartAuthorizedEvent.getOrderId();
-        Long userId = cartAuthorizedEvent.getUserId();
-
         Optional<Reservation> optional = reservationRepository.findById(reservationId);
+
         if (optional.isPresent()) {
             Reservation reservation = optional.get();
-            Long reservationOrderId = reservation.getOrderId();
-            Long reservationUserId = reservation.getUserId();
 
-            if (Objects.equals(reservationOrderId, orderId) &&
-                    Objects.equals(reservationUserId, userId)) {
+            reservation.setStatus(CONFIRMED);
+            reservationRepository.save(reservation);
 
-                reservation.setStatus(CONFIRMED);
-                reservationRepository.save(reservation);
-
-                ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
-                        reservationId, orderId, userId);
-
-                jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
-
-                LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
-            } else {
-                ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
-                        reservationId, reservationOrderId, reservationUserId, cartAuthorizedEvent.getCartNumber(),
-                        "The Reservation attributes (" + orderId + ", " + userId + ") do not match");
-
-                jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
-
-                LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
-            }
-
+            sendReservationConfirmedEvent(reservation);
         } else {
-            ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
-                    reservationId, orderId, userId, cartAuthorizedEvent.getCartNumber(),
-                    "The Reservation '" + reservationId + "' does not exist");
-
-            jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
-
-            LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
+            handleReservationMissedError(cartAuthorizedEvent);
         }
+    }
+
+    private void sendReservationConfirmedEvent(Reservation reservation) {
+        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
+                reservation.getId(), reservation.getOrderId(), reservation.getUserId());
+
+        jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+
+        LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
+    }
+
+    private void handleReservationMissedError(CartAuthorizedEvent cartAuthorizedEvent) {
+        String reservationId = cartAuthorizedEvent.getReservationId();
+
+        ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
+                reservationId,
+                cartAuthorizedEvent.getOrderId(),
+                cartAuthorizedEvent.getUserId(),
+                cartAuthorizedEvent.getCartNumber(),
+                "The Reservation '" + reservationId + "' does not exist");
+        jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
+
+        LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
     }
 }

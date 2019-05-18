@@ -13,6 +13,7 @@ import rt.sagas.order.JmsOrderCreatedEventReceiver;
 import rt.sagas.order.entities.Order;
 import rt.sagas.order.repositories.OrderRepository;
 import rt.sagas.order.services.OrderEventsSender;
+import rt.sagas.testutils.TestRuntimeException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -44,7 +45,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
 
         doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
-            throw new RuntimeException();
+            throw new TestRuntimeException("Intended exception - ignore");
         }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
 
         mvc.perform(post("/orders")

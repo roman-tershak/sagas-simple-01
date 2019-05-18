@@ -29,24 +29,19 @@ public class ReservationEventsListener {
     public void receiveMessage(@Payload ReservationConfirmedEvent reservationConfirmedEvent) {
         final Long orderId = reservationConfirmedEvent.getOrderId();
 
-        LOGGER.info("Reservation Event Confirmed received: {}", reservationConfirmedEvent);
+        LOGGER.info("Reservation Confirmed Event received: {}", reservationConfirmedEvent);
 
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isPresent()) {
-
             Order order = optionalOrder.get();
 
-            if (order.getUserId() == reservationConfirmedEvent.getUserId()) {
-                order.setReservationId(reservationConfirmedEvent.getReservationId());
-                order.setStatus(OrderStatus.COMPLETE);
+            order.setReservationId(reservationConfirmedEvent.getReservationId());
+            order.setStatus(OrderStatus.COMPLETE);
+            orderRepository.save(order);
 
-                orderRepository.save(order);
-            } else {
-                LOGGER.error("Order does not match Reservation Confirmed Event: {}, {}",
-                        order, reservationConfirmedEvent);
-            }
         } else {
-            LOGGER.error("Order not found for Reservation Confirmed Event: {}", reservationConfirmedEvent);
+            LOGGER.error("Order not found for Reservation Confirmed Event: {}",
+                    reservationConfirmedEvent);
         }
     }
 
