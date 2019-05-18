@@ -6,7 +6,7 @@ spring:
 #    password: sagahtgrfe
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 #  activemq:
 #    broker-url: tcp://activemqsrv:61616

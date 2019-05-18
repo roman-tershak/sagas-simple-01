@@ -24,9 +24,9 @@ import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 @SpringBootTest
 public class OrderEventsListenerTest extends AbstractListenerTest {
 
-    private static final Long ORDER_ID = 123L;
-    private static final Long USER_ID = 11L;
-    private static final String CART_NUMBER = "1234567890123456";
+    private static final Long ORDER_ID = 123333L;
+    private static final Long USER_ID = 111111L;
+    private static final String CART_NUMBER = "1111567890123456";
 
     @Autowired
     private ReservationFactory reservationFactory;

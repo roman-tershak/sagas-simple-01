@@ -27,8 +27,8 @@ import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 public class CartEventsListenerTest extends AbstractListenerTest {
 
     public static final Long ORDER_ID = 15L;
-    public static final Long USER_ID = 678L;
-    public static final String CART_NUMBER = "1234543211234567";
+    public static final Long USER_ID = 11112L;
+    public static final String CART_NUMBER = "2222543211234567";
 
     @Autowired
     private ReservationFactory reservationFactory;
@@ -48,6 +48,7 @@ public class CartEventsListenerTest extends AbstractListenerTest {
 
     @After
     public void tearDown() {
+        System.out.println("tear down");
         reservationRepositorySpy.setThrowExceptionInSave(false);
         super.tearDown();
         reservationConfirmedEventReceiver.clear();
@@ -55,7 +56,7 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     }
 
     @Test
-    public void testReservationGetsCompletedWhenCartApprovedEventIsReceived() throws Exception {
+    public void testReservationGetsCompletedAndReservationCompletedEventIsSentWhenCartApprovedEventIsReceived() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);
         String reservationId = pendingReservation.getId();
@@ -70,17 +71,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         assertThat(reservation, is(notNullValue()));
         assertThat(reservation.getOrderId(), is(ORDER_ID));
         assertThat(reservation.getUserId(), is(USER_ID));
-    }
-
-    @Test
-    public void testReservationCompletedEventIsSentWhenCartAuthorizedEventIsReceived() throws Exception {
-        Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
-        reservationRepository.save(pendingReservation);
-
-        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
-                pendingReservation.getId(),
-                CART_NUMBER, ORDER_ID, USER_ID);
-        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
         ReservationConfirmedEvent reservationConfirmedEvent = reservationConfirmedEventReceiver.pollEvent();
         assertThat(reservationConfirmedEvent, is(notNullValue()));

@@ -30,13 +30,13 @@ public class OrderControllerEventsTest extends AbstractOrderControllerTest {
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(convertToJson(
-                        new Order(17L, "1234567890123456"))))
+                        new Order(12L, "1234567890123451"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
         OrderCreatedEvent orderCreatedEvent = jmsOrderCreatedEventReceiver.pollEvent();
         assertThat(orderCreatedEvent, is(notNullValue()));
-        assertThat(orderCreatedEvent.getUserId(), is(17L));
-        assertThat(orderCreatedEvent.getCartNumber(), is("1234567890123456"));
+        assertThat(orderCreatedEvent.getUserId(), is(12L));
+        assertThat(orderCreatedEvent.getCartNumber(), is("1234567890123451"));
         assertThat(orderCreatedEvent.getOrderId(), is(notNullValue()));
 
     }

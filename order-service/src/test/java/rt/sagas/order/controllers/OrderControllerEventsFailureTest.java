@@ -51,7 +51,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(convertToJson(
-                        new Order(17L, "1234567890123456"))))
+                        new Order(11L, "1234567890123450"))))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
         assertThat(jmsOrderCreatedEventReceiver.pollEvent(5000L), is(nullValue()));
@@ -64,16 +64,16 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(convertToJson(
-                        new Order(17L, "1234567890123456"))))
+                        new Order(11L, "1234567890123450"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
         OrderCreatedEvent orderCreated = jmsOrderCreatedEventReceiver.pollEvent();
         assertThat(orderCreated, is(notNullValue()));
-        assertThat(orderCreated.getUserId(), is(17L));
+        assertThat(orderCreated.getUserId(), is(11L));
 
         assertThat(orderRepository.count(), is(1L));
         assertThat(orderRepository.findById(orderCreated.getOrderId()).get().getCartNumber(),
-                is("1234567890123456"));
+                is("1234567890123450"));
     }
 
 }

@@ -21,8 +21,8 @@ public class OrderControllerTest extends AbstractOrderControllerTest {
 
     @Test
     public void testOrderCreation() throws Exception {
-        long userId = 17L;
-        String cartNumber = "1234567890123456";
+        long userId = 13L;
+        String cartNumber = "1234567890123452";
         Order order = new Order(userId, cartNumber);
 
         String responseString = mvc.perform(post("/orders")
