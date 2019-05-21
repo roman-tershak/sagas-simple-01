@@ -6,8 +6,10 @@ execution:
 scenarios:
   create-order:
     requests:
-    - url: http://order-service:8080/orders
-      method: POST
-      headers:
-        Content-Type: application/json;charset=UTF-8
-      body: '{"userId":17, "cartNumber":"1234567890123456"}'
+    - loop: 10
+      do:
+      - url: http://order-service:8080/orders
+        method: POST
+        headers:
+          Content-Type: application/json;charset=UTF-8
+        body: '{"userId":17, "cartNumber":"1234567890123456"}'
