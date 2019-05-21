@@ -1,0 +1,1 @@
+docker run -ti --rm --name test-loader --network vnet-saga-simple-1 rtershak/test-loader:latest
