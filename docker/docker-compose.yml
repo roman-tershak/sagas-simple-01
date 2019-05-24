@@ -1,4 +1,4 @@
-version: '2'
+version: '2.4'
 
 networks:
   vnet-saga-simple-1:
@@ -17,18 +17,30 @@ services:
       - MYSQL_DATABASE=sagasimple1
       - MYSQL_USER=sagau
       - MYSQL_PASSWORD=sagahtgrfe
+    healthcheck:
+      test: mysqladmin ping -h mariadbsrv -u sagau -psagahtgrfe
+      interval: 7s
+#      start_period: 10s
+      retries: 10
   activemq-service:
     image: rtershak/activemq:5.15.9
     container_name: activemqsrv
     hostname: activemqsrv
     networks:
       - vnet-saga-simple-1
+    healthcheck:
+      test: curl -u admin:admin -s http://activemqsrv:8161/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,service=Health/healthStatus
+      interval: 7s
+#      start_period: 10s
+      retries: 10
   order-service:
     image: saga-tests-simple-1/order-service:1.0-SNAPSHOT
     container_name: order-service
     depends_on:
-      - mariadb-service
-      - activemq-service
+      mariadb-service:
+        condition: service_healthy
+      activemq-service:
+        condition: service_healthy
     hostname: order-service
     networks:
       - vnet-saga-simple-1
@@ -65,3 +77,15 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+#  test-loader:
+#    image: saga-tests-simple-1/test-loader:1.0-SNAPSHOT
+#    container_name: test-loader
+#    depends_on:
+#      - mariadb-service
+#      - activemq-service
+#      - order-service
+#      - reservation-service
+#      - cart-service
+#    hostname: test-loader
+#    networks:
+#      - vnet-saga-simple-1
