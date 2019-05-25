@@ -18,7 +18,7 @@ services:
       - MYSQL_USER=sagau
       - MYSQL_PASSWORD=sagahtgrfe
     healthcheck:
-      test: mysqladmin ping -h mariadbsrv -u sagau -psagahtgrfe
+      test: mysqladmin ping -h localhost -u sagau -psagahtgrfe
       interval: 7s
 #      start_period: 10s
       retries: 10
@@ -29,7 +29,7 @@ services:
     networks:
       - vnet-saga-simple-1
     healthcheck:
-      test: curl -u admin:admin -s http://activemqsrv:8161/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,service=Health/healthStatus
+      test: curl -u admin:admin -s http://localhost:8161/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,service=Health/healthStatus
       interval: 7s
 #      start_period: 10s
       retries: 10
@@ -53,8 +53,10 @@ services:
     image: saga-tests-simple-1/reservation-service:1.0-SNAPSHOT
     container_name: reservation-service
     depends_on:
-      - mariadb-service
-      - activemq-service
+      mariadb-service:
+        condition: service_healthy
+      activemq-service:
+        condition: service_healthy
     hostname: reservation-service
     networks:
       - vnet-saga-simple-1
@@ -67,8 +69,10 @@ services:
     image: saga-tests-simple-1/cart-service:1.0-SNAPSHOT
     container_name: cart-service
     depends_on:
-      - mariadb-service
-      - activemq-service
+      mariadb-service:
+        condition: service_healthy
+      activemq-service:
+        condition: service_healthy
     hostname: cart-service
     networks:
       - vnet-saga-simple-1
