@@ -30,6 +30,8 @@ services:
     hostname: activemqsrv
     networks:
       - vnet-saga-simple-1
+    ports:
+      - 8161:8161
     healthcheck:
       test: curl -u admin:admin -s http://localhost:8161/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,service=Health/healthStatus
       interval: 7s

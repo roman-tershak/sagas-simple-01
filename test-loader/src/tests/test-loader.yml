@@ -13,4 +13,4 @@ scenarios:
       method: POST
       headers:
         Content-Type: application/json;charset=UTF-8
-      body: '{"userId":${userId}, "cartNumber":"${cartNumber}"}'
+      body: '{"userId":${__javaScript( Math.floor(Math.random() * 10000) )}, "cartNumber":"${__javaScript( Math.floor(Math.random() * 10000000000000000).toFixed(0) )}"}'
