@@ -18,11 +18,13 @@ services:
       - MYSQL_USER=sagau
       - MYSQL_PASSWORD=sagahtgrfe
     healthcheck:
-      test: mysqladmin ping -h localhost -u sagau -psagahtgrfe
+      test: mysqladmin --connect_timeout=3 status -h localhost -u sagau -psagahtgrfe
       interval: 7s
-#      start_period: 10s
       retries: 10
   activemq-service:
+    build:
+      context: activemq/
+      dockerfile: Dockerfile
     image: rtershak/activemq:5.15.9
     container_name: activemqsrv
     hostname: activemqsrv
@@ -31,7 +33,6 @@ services:
     healthcheck:
       test: curl -u admin:admin -s http://localhost:8161/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,service=Health/healthStatus
       interval: 7s
-#      start_period: 10s
       retries: 10
   order-service:
     image: saga-tests-simple-1/order-service:1.0-SNAPSHOT
