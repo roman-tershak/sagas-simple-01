@@ -1,13 +1,15 @@
 spring:
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
+#  datasource:
+#    driver-class-name: org.mariadb.jdbc.Driver
 #    url: jdbc:mariadb://mariadbsrv:3306/sagasimple1
 #    username: sagau
 #    password: sagahtgrfe
   jpa:
     hibernate:
       ddl-auto: update
-
+  jta:
+    log-dir: tx-logs
+    transaction-manager-id: txManager
 #  activemq:
 #    broker-url: tcp://activemqsrv:61616
 #    user: admin

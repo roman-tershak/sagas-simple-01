@@ -34,7 +34,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderControllerTes
     private OrderEventsSender orderEventsSenderSpy;
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         doAnswer(invocationOnMock -> {
             return invocationOnMock.callRealMethod();
         }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));

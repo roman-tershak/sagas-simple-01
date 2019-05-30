@@ -1,11 +1,13 @@
 package rt.sagas.order.listeners;
 
+import com.atomikos.jdbc.AbstractDataSourceBean;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.ReservationConfirmedEvent;
@@ -28,6 +30,9 @@ public class ReservationEventsListenerTest {
     private JmsTemplate jmsTemplate;
     @Autowired
     private OrderRepositorySpy orderRepositorySpy;
+    @Autowired
+    private ApplicationContext ctx;
+
 
     private long orderId;
 
@@ -43,6 +48,8 @@ public class ReservationEventsListenerTest {
     @After
     public void tearDown() {
         orderRepositorySpy.setThrowExceptionInSave(false);
+        AbstractDataSourceBean dataSource = (AbstractDataSourceBean) ctx.getBean("dataSource");
+        dataSource.close();
     }
 
     @Test
