@@ -20,6 +20,8 @@ public class JTAConfiguration {
         JtaTransactionManager manager = new JtaTransactionManager();
         manager.setTransactionManager( atomikosUserTransactionManager() );
         manager.setUserTransaction( atomikosUserTransaction() );
+        manager.setTransactionManagerName("txManager");
+        manager.setDefaultTimeout(100);
         manager.setAllowCustomIsolationLevels(true);
         manager.afterPropertiesSet();
         return manager;

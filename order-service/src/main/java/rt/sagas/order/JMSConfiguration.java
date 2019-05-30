@@ -11,9 +11,10 @@ import org.springframework.boot.jta.atomikos.AtomikosConnectionFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
@@ -43,7 +44,7 @@ public class JMSConfiguration {
         return cachingConnectionFactory;
     }
 
-    @Bean(initMethod = "init", destroyMethod = "close")
+    @Bean/*(initMethod = "init", destroyMethod = "close")*/
     public AtomikosConnectionFactoryBean atomikosJmsConnectionFactory() {
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setInitialRedeliveryDelay(10000L);
@@ -62,22 +63,17 @@ public class JMSConfiguration {
         return atomikosConnectionFactoryBean;
     }
 
-    @Bean
+    @Bean("jmsListenerContainerFactory")
     @DependsOn({ "transactionManager" })
-    public DefaultMessageListenerContainer messageListenerContainer(
+    public JmsListenerContainerFactory queueListenerFactory(
             @Autowired PlatformTransactionManager transactionManager) {
-        DefaultMessageListenerContainer messageSource = new DefaultMessageListenerContainer();
-        messageSource.setTransactionManager( transactionManager );
-        messageSource.setConnectionFactory( atomikosJmsConnectionFactory() );
-        messageSource.setSessionTransacted(true);
-        messageSource.setSessionAcknowledgeMode(0);
-        messageSource.setConcurrentConsumers(1);
-        messageSource.setMessageConverter(messageConverter());
-//        messageSource.setReceiveTimeout( gisConfig.getMomQueueGdmTimeoutReceive() );
-//        messageSource.setDestinationName( gisConfig.getMomQueueGdmName() );
-//        messageSource.setMessageListener( context.getBean("portSIQueue") );
-        messageSource.afterPropertiesSet();
-        return messageSource;
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setConnectionFactory( atomikosJmsConnectionFactory() );
+        factory.setTransactionManager( transactionManager );
+        factory.setMessageConverter( messageConverter() );
+        factory.setSessionTransacted(true);
+        factory.setSessionAcknowledgeMode(0);
+        return factory;
     }
 
 //    @Bean("jmsListenerContainerFactory")
