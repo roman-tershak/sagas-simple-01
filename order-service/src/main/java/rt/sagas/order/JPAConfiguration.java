@@ -23,7 +23,7 @@ public class JPAConfiguration {
     @Value("${spring.datasource.password}")
     private String password;
 
-    @Bean(initMethod = "init", destroyMethod = "close")
+    @Bean(name="dataSource", initMethod = "init", destroyMethod = "close")
     public AtomikosDataSourceBean atomikosJdbcConnectionFactory() throws Exception {
 
         MysqlXADataSource mysqlXADataSource = new MysqlXADataSource();
