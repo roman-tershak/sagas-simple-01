@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.cart.entities.Transaction;
 import rt.sagas.cart.repositories.TransactionRepository;
@@ -33,13 +32,14 @@ public class ReservationEventsListenerTest {
     @Autowired
     private JmsCartAuthorizedEventReceiver cartAuthorizedEventReceiver;
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private JmsReservationCreatedEventSender jmsSender;
 
     @Test
     public void testTransactionIsCreatedAndCartAuthorizedEventIsSentOnReservationCreatedEvent() throws Exception {
         ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
                 RESERVATION_ID, ORDER_ID, USER_ID, CART_NUMBER);
-        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
+
+        jmsSender.send(reservationCreatedEvent);
 
         CartAuthorizedEvent cartAuthorizedEvent = cartAuthorizedEventReceiver.pollEvent(5000L);
         assertThat(cartAuthorizedEvent, is(notNullValue()));
