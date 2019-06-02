@@ -17,7 +17,7 @@ public class OrderService {
     @Autowired
     private OrderEventsSender eventsSender;
 
-    @Transactional(REQUIRED)
+    @Transactional(value = REQUIRED, rollbackOn = {Exception.class})
     public Order createOrder(Order order) {
 
         Order orderSaved = orderRepository.save(order);
