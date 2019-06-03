@@ -9,6 +9,7 @@ import rt.sagas.cart.entities.Transaction;
 import rt.sagas.cart.repositories.TransactionRepository;
 import rt.sagas.events.CartAuthorizedEvent;
 import rt.sagas.events.ReservationCreatedEvent;
+import rt.sagas.testutils.JmsSender;
 
 import java.util.Optional;
 
@@ -32,14 +33,14 @@ public class ReservationEventsListenerTest {
     @Autowired
     private JmsCartAuthorizedEventReceiver cartAuthorizedEventReceiver;
     @Autowired
-    private JmsReservationCreatedEventSender jmsSender;
+    private JmsSender jmsSender;
 
     @Test
     public void testTransactionIsCreatedAndCartAuthorizedEventIsSentOnReservationCreatedEvent() throws Exception {
         ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
                 RESERVATION_ID, ORDER_ID, USER_ID, CART_NUMBER);
 
-        jmsSender.send(reservationCreatedEvent);
+        jmsSender.send(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
 
         CartAuthorizedEvent cartAuthorizedEvent = cartAuthorizedEventReceiver.pollEvent(5000L);
         assertThat(cartAuthorizedEvent, is(notNullValue()));

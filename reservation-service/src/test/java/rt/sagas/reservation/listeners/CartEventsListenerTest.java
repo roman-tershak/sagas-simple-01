@@ -5,10 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.CartAuthorizedEvent;
-import rt.sagas.events.QueueNames;
 import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.events.ReservationErrorEvent;
 import rt.sagas.reservation.JmsReservationConfirmedEventReceiver;
@@ -16,9 +14,11 @@ import rt.sagas.reservation.JmsReservationErrorEventReceiver;
 import rt.sagas.reservation.ReservationRepositorySpy;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
+import rt.sagas.testutils.JmsSender;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 import static rt.sagas.reservation.entities.ReservationStatus.CONFIRMED;
 import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 
@@ -35,7 +35,7 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     @Autowired
     private ReservationRepositorySpy reservationRepositorySpy;
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private JmsSender jmsSender;
     @Autowired
     private JmsReservationConfirmedEventReceiver reservationConfirmedEventReceiver;
     @Autowired
@@ -64,7 +64,7 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
                 reservationId,
                 CART_NUMBER, ORDER_ID, USER_ID);
-        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
         Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(
                 reservationId, CONFIRMED, 5000L);
@@ -72,7 +72,8 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         assertThat(reservation.getOrderId(), is(ORDER_ID));
         assertThat(reservation.getUserId(), is(USER_ID));
 
-        ReservationConfirmedEvent reservationConfirmedEvent = reservationConfirmedEventReceiver.pollEvent();
+        ReservationConfirmedEvent reservationConfirmedEvent = reservationConfirmedEventReceiver.pollEvent(
+                e -> e.getReservationId().equals(reservationId));
         assertThat(reservationConfirmedEvent, is(notNullValue()));
         assertThat(reservationConfirmedEvent.getReservationId(), is(pendingReservation.getId()));
         assertThat(reservationConfirmedEvent.getOrderId(), is(ORDER_ID));
@@ -83,16 +84,18 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     public void testReservationErrorEventIsSentWhenNoPendingReservationIsFound() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);
+        String reservationId = pendingReservation.getId();
 
         CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
                 "not-existing-reservation",
                 CART_NUMBER, ORDER_ID, USER_ID);
-        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
-        ReservationConfirmedEvent reservationConfirmedEvent = reservationConfirmedEventReceiver.pollEvent(5000L);
-        assertThat(reservationConfirmedEvent, is(nullValue()));
+        assertThat(reservationConfirmedEventReceiver.pollEvent(
+                e -> e.getReservationId().equals(reservationId), 5000L), is(nullValue()));
 
-        ReservationErrorEvent reservationErrorEvent = reservationErrorEventReceiver.pollEvent(5000L);
+        ReservationErrorEvent reservationErrorEvent = reservationErrorEventReceiver.pollEvent(
+                e -> e.getReservationId().equals("not-existing-reservation"), 5000L);
         assertThat(reservationErrorEvent, is(notNullValue()));
         assertThat(reservationErrorEvent.getReservationId(), is("not-existing-reservation"));
         assertThat(reservationErrorEvent.getOrderId(), is(ORDER_ID));
@@ -112,9 +115,10 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
                 reservationId,
                 CART_NUMBER, ORDER_ID, USER_ID);
-        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
-        assertThat(reservationConfirmedEventReceiver.pollEvent(5000L), is(nullValue()));
+        assertThat(reservationConfirmedEventReceiver.pollEvent(
+                e -> e.getReservationId().equals(reservationId), 5000L), is(nullValue()));
         assertThat(reservationErrorEventReceiver.pollEvent(1000L), is(nullValue()));
 
         Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(

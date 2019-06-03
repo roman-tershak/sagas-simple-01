@@ -1,19 +1,18 @@
 package rt.sagas.order.listeners;
 
-import com.atomikos.jdbc.AbstractDataSourceBean;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.order.OrderRepositorySpy;
+import rt.sagas.order.AbstractOrderTest;
 import rt.sagas.order.entities.Order;
 import rt.sagas.order.entities.OrderStatus;
+import rt.sagas.testutils.JmsSender;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -21,17 +20,15 @@ import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ReservationEventsListenerTest {
+public class ReservationEventsListenerTest extends AbstractOrderTest {
 
     private static final long USER_ID = 12L;
     private static final String RESERVATION_ID = "ABCDEF-1234-8765-UVWXYZ-12";
 
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private JmsSender jmsSender;
     @Autowired
     private OrderRepositorySpy orderRepositorySpy;
-    @Autowired
-    private ApplicationContext ctx;
 
 
     private long orderId;
@@ -48,8 +45,6 @@ public class ReservationEventsListenerTest {
     @After
     public void tearDown() {
         orderRepositorySpy.setThrowExceptionInSave(false);
-        AbstractDataSourceBean dataSource = (AbstractDataSourceBean) ctx.getBean("dataSource");
-        dataSource.close();
     }
 
     @Test
@@ -57,7 +52,7 @@ public class ReservationEventsListenerTest {
         ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 
@@ -73,7 +68,7 @@ public class ReservationEventsListenerTest {
         ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
                 RESERVATION_ID, orderId, USER_ID);
 
-        jmsTemplate.convertAndSend(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
 

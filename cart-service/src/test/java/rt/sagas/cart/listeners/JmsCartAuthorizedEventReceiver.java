@@ -6,11 +6,14 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.CartAuthorizedEvent;
 import rt.sagas.testutils.JmsReceiver;
 
+import javax.transaction.Transactional;
+
 import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 
 @Component
 public class JmsCartAuthorizedEventReceiver extends JmsReceiver<CartAuthorizedEvent> {
 
+    @Transactional
     @JmsListener(destination = CART_AUTHORIZED_EVENT_QUEUE)
     @Override
     public void receiveMessage(@Payload CartAuthorizedEvent event) {
