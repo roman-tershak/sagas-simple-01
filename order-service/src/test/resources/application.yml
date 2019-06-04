@@ -3,7 +3,8 @@ spring:
     enabled: true
     atomikos:
       properties:
-        TransactionManagerUniqueName: order-service-tm
+        transaction-manager-unique-name: order-service-tm
+        default-jta-timeout: 30s
 
       datasource:
         xa-data-source-class-name: org.h2.jdbcx.JdbcDataSource
@@ -11,11 +12,12 @@ spring:
         max-pool-size: 5
         min-pool-size: 2
 
-      activemq:
-        broker-url: vm://embedded-broker?broker.persistent=false&broker.useShutdownHook=false
-        in-memory: true
-        packages:
-          trust-all: true
   jms:
     template:
-      time-to-live: 10s
+      time-to-live: 20s
+
+  activemq:
+    broker-url: vm://embedded-broker?broker.persistent=false&broker.useShutdownHook=false
+    in-memory: true
+    packages:
+      trust-all: true

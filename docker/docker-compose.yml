@@ -48,7 +48,7 @@ services:
     networks:
       - vnet-saga-simple-1
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1?pinGlobalTxToPhysicalConnection=true
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
@@ -64,7 +64,7 @@ services:
     networks:
       - vnet-saga-simple-1
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1?pinGlobalTxToPhysicalConnection=true
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
@@ -80,7 +80,7 @@ services:
     networks:
       - vnet-saga-simple-1
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1?pinGlobalTxToPhysicalConnection=true
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616

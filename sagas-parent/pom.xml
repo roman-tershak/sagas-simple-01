@@ -31,6 +31,8 @@
         <spring.jms.version>5.1.5.RELEASE</spring.jms.version>
         <artemis.jms.server.version>2.6.4</artemis.jms.server.version>
 
+        <activemq-broker.version>5.15.8</activemq-broker.version>
+
         <mysql.connector.version>5.1.6</mysql.connector.version>
 
         <jackson.version>2.9.8</jackson.version>
@@ -99,6 +101,17 @@
                         <groupId>org.apache.geronimo.specs</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-activemq</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-broker</artifactId>
+                <version>${activemq-broker.version}</version>
             </dependency>
 
             <dependency>

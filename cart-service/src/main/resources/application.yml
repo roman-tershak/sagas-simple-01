@@ -1,14 +1,30 @@
 spring:
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://mariadbsrv:3306/sagasimple1
-#    username: sagau
-#    password: sagahtgrfe
+  jta:
+    enabled: true
+    atomikos:
+      properties:
+        transaction-manager-unique-name: cart-service-tm
+        max-actives: 100
+        default-jta-timeout: 30s
+        serial-jta-transactions: false
+
+      datasource:
+        xa-data-source-class-name: com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+        min-pool-size: 2
+        max-pool-size: 20
+        test-query: SELECT 1;
+
+  jms:
+    template:
+      time-to-live: 1h
+
+  activemq:
+    pool:
+      enabled: true
+      max-connections: 20
+    packages:
+      trust-all: true
+
   jpa:
     hibernate:
       ddl-auto: update
-
-#  activemq:
-#    broker-url: tcp://activemqsrv:61616
-#    user: admin
-#    password: admin
