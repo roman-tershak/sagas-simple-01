@@ -25,7 +25,7 @@ services:
     build:
       context: activemq/
       dockerfile: Dockerfile
-    image: rtershak/activemq:5.15.9
+    image: saga-tests-simple-1/activemq:5.15.9
     container_name: activemqsrv
     hostname: activemqsrv
     networks:
