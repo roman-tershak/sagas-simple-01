@@ -48,7 +48,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
 
     @After
     public void tearDown() {
-        System.out.println("tear down");
         reservationRepositorySpy.setThrowExceptionInSave(false);
         super.tearDown();
         reservationConfirmedEventReceiver.clear();

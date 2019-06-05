@@ -39,6 +39,8 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
         doAnswer(invocationOnMock -> {
             return invocationOnMock.callRealMethod();
         }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
+
+        orderRepository.deleteAll();
     }
 
     @Test
@@ -52,10 +54,12 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(convertToJson(
-                        new Order(11L, "1234567890123450"))))
+                        new Order(11L, "123212321232123212321"))))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        assertThat(jmsOrderCreatedEventReceiver.pollEvent(5000L), is(nullValue()));
+        assertThat(jmsOrderCreatedEventReceiver.pollEvent(
+                e-> e.getCartNumber().equals("123212321232123212321"),
+                10000L), is(nullValue()));
         assertThat(orderRepository.count(), is(0L));
     }
 
@@ -65,16 +69,18 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(convertToJson(
-                        new Order(11L, "1234567890123450"))))
+                        new Order(11L, "123456784444444444"))))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
 
-        OrderCreatedEvent orderCreated = jmsOrderCreatedEventReceiver.pollEvent();
-        assertThat(orderCreated, is(notNullValue()));
-        assertThat(orderCreated.getUserId(), is(11L));
+        OrderCreatedEvent orderCreatedEvent = jmsOrderCreatedEventReceiver.pollEvent(
+                e -> e.getCartNumber().equals("123456784444444444"), 20000L);
+        assertThat(orderCreatedEvent, is(notNullValue()));
+        assertThat(orderCreatedEvent.getUserId(), is(11L));
 
         assertThat(orderRepository.count(), is(1L));
-        assertThat(orderRepository.findById(orderCreated.getOrderId()).get().getCartNumber(),
-                is("1234567890123450"));
+        Order orderCreated = orderRepository.findAll().iterator().next();
+        assertThat(orderCreated.getCartNumber(),
+                is("123456784444444444"));
     }
 
 }
