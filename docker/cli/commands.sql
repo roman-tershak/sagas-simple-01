@@ -1,7 +1,6 @@
 select (select count(*) from orders), (select count(*) from reservations), (select count(*) from transactions);
-select (select count(*) from orders where status != 'COMPLETE') not_complete,
-  (select count(*) from reservations where status != 'CONFIRMED') not_confirmed,
-  (select count(*) from transactions where status != 'AUTHORIZED') not_authorized;
+select (select count(*) from orders where status != 'COMPLETE') not_complete, (select count(*) from reservations where status != 'CONFIRMED') not_confirmed, (select count(*) from transactions where status != 'AUTHORIZED') not_authorized;
+select (select count(*) from orders where status = 'COMPLETE') complete, (select count(*) from reservations where status = 'CONFIRMED') confirmed, (select count(*) from transactions where status = 'AUTHORIZED') authorized;
 
 delete from orders;
 delete from reservations;
