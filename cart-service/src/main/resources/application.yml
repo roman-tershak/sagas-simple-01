@@ -4,8 +4,9 @@ spring:
     atomikos:
       properties:
         transaction-manager-unique-name: cart-service-tm
+        enable-logging: true
         max-actives: 100
-        default-jta-timeout: 30s
+        default-jta-timeout: 300s
         serial-jta-transactions: false
 
       datasource:
@@ -13,6 +14,10 @@ spring:
         min-pool-size: 2
         max-pool-size: 20
         test-query: SELECT 1;
+
+      connectionfactory:
+        min-pool-size: 1
+        max-pool-size: 20
 
   jms:
     template:
