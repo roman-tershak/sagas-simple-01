@@ -1,14 +1,28 @@
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      connection-test-query: SELECT 1;
+      maximum-pool-size: 20
+      minimum-idle: 2
 #    url: jdbc:mariadb://mariadbsrv:3306/sagasimple1
 #    username: sagau
 #    password: sagahtgrfe
+
+  activemq:
+    pool:
+      enabled: true
+      max-connections: 20
+    packages:
+      trust-all: true
+#    broker-url: tcp://activemqsrv:61616
+#    user: admin
+#    password: admin
+
   jpa:
     hibernate:
       ddl-auto: update
 
-#  activemq:
-#    broker-url: tcp://activemqsrv:61616
-#    user: admin
-#    password: admin
+  jms:
+    template:
+      time-to-live: 1h

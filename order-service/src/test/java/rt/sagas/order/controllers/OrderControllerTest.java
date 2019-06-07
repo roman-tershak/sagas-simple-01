@@ -1,13 +1,16 @@
 package rt.sagas.order.controllers;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import rt.sagas.order.Application;
+import rt.sagas.order.AbstractOrderTest;
 import rt.sagas.order.entities.Order;
+import rt.sagas.order.repositories.OrderRepository;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -16,8 +19,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static rt.sagas.order.entities.OrderStatus.NEW;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class OrderControllerTest extends AbstractOrderControllerTest {
+@SpringBootTest
+public class OrderControllerTest extends AbstractOrderTest {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @After
+    public void tearDown() {
+        orderRepository.deleteAll();
+    }
 
     @Test
     public void testOrderCreation() throws Exception {

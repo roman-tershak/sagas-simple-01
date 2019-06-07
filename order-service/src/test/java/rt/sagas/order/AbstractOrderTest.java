@@ -1,4 +1,4 @@
-package rt.sagas.order.controllers;
+package rt.sagas.order;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.IOException;
 
 @AutoConfigureMockMvc
-public class AbstractOrderControllerTest {
+public class AbstractOrderTest {
 
     @Autowired
     protected MockMvc mvc;

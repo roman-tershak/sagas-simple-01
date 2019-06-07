@@ -25,7 +25,7 @@ services:
     build:
       context: activemq/
       dockerfile: Dockerfile
-    image: rtershak/activemq:5.15.9
+    image: saga-tests-simple-1/activemq:5.15.9
     container_name: activemqsrv
     hostname: activemqsrv
     networks:
@@ -37,7 +37,7 @@ services:
       interval: 7s
       retries: 10
   order-service:
-    image: saga-tests-simple-1/order-service:1.0-SNAPSHOT
+    image: saga-tests-simple-1/order-service:1.0-NEST-TRANS
     container_name: order-service
     depends_on:
       mariadb-service:
@@ -52,8 +52,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+#      - logging.level.org.hibernate=WARN
   reservation-service:
-    image: saga-tests-simple-1/reservation-service:1.0-SNAPSHOT
+    image: saga-tests-simple-1/reservation-service:1.0-NEST-TRANS
     container_name: reservation-service
     depends_on:
       mariadb-service:
@@ -68,8 +69,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+#      - logging.level.org.hibernate=WARN
   cart-service:
-    image: saga-tests-simple-1/cart-service:1.0-SNAPSHOT
+    image: saga-tests-simple-1/cart-service:1.0-NEST-TRANS
     container_name: cart-service
     depends_on:
       mariadb-service:
@@ -84,15 +86,4 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
-#  test-loader:
-#    image: saga-tests-simple-1/test-loader:1.0-SNAPSHOT
-#    container_name: test-loader
-#    depends_on:
-#      - mariadb-service
-#      - activemq-service
-#      - order-service
-#      - reservation-service
-#      - cart-service
-#    hostname: test-loader
-#    networks:
-#      - vnet-saga-simple-1
+#      - logging.level.org.hibernate=WARN

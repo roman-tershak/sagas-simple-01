@@ -8,3 +8,10 @@ spring:
   activemq:
     broker-url: vm://embedded-broker?broker.persistent=false&broker.useShutdownHook=false
     in-memory: true
+    packages:
+      trust-all: true
+
+  jms:
+    template:
+      time-to-live: 20s
+

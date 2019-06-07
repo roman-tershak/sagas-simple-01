@@ -7,11 +7,11 @@
     <parent>
         <artifactId>sagas-parent</artifactId>
         <groupId>rt.sagas</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-NEST-TRANS</version>
         <relativePath>../sagas-parent/pom.xml</relativePath>
     </parent>
     <artifactId>events-api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-NEST-TRANS</version>
     <packaging>jar</packaging>
 
 </project>
