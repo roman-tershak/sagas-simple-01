@@ -37,11 +37,13 @@ public class JMSConfiguration {
         return factory;
     }
 
-    protected CachingConnectionFactory cachingConnectionFactory() {
+    @Bean
+    public CachingConnectionFactory cachingConnectionFactory() {
         return new CachingConnectionFactory(activeMQConnectionFactory());
     }
 
-    protected ActiveMQConnectionFactory activeMQConnectionFactory() {
+    @Bean
+    public ActiveMQConnectionFactory activeMQConnectionFactory() {
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setBrokerURL(brokerUrl);
         return activeMQConnectionFactory;

@@ -86,4 +86,4 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
-#      - logging.level.org.hibernate=WARN
+#      - logging.level.org.springframework=DEBUG
