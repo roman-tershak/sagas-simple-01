@@ -5,14 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import rt.sagas.cart.entities.Transaction;
-import rt.sagas.cart.entities.TransactionStatus;
-import rt.sagas.cart.repositories.TransactionRepository;
-import rt.sagas.events.CartAuthorizedEvent;
-import rt.sagas.events.QueueNames;
+import rt.sagas.cart.services.TransactionService;
 import rt.sagas.events.ReservationCreatedEvent;
 
 import javax.transaction.Transactional;
@@ -25,9 +20,7 @@ public class ReservationEventsListener {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Autowired
-    private TransactionRepository transactionRepository;
-    @Autowired
-    private JmsTemplate jmsTemplate;
+    private TransactionService transactionService;
 
     @Transactional
     @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
@@ -39,12 +32,8 @@ public class ReservationEventsListener {
         Long userId = reservationCreatedEvent.getUserId();
         String cartNumber = reservationCreatedEvent.getCartNumber();
 
-        Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
-        transactionRepository.save(transaction);
+        transactionService.authorizeTransaction(reservationId, orderId, userId, cartNumber);
 
-        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
-        jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
-
-        LOGGER.info("Cart Authorized Event sent: {}", cartAuthorizedEvent);
+        LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
     }
 }
