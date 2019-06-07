@@ -52,6 +52,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+#      - logging.level.com.atomikos=TRACE
   reservation-service:
     image: saga-tests-simple-1/reservation-service:1.0-SNAPSHOT
     container_name: reservation-service
@@ -68,6 +69,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+      - logging.level.com.atomikos=TRACE
   cart-service:
     image: saga-tests-simple-1/cart-service:1.0-SNAPSHOT
     container_name: cart-service
@@ -84,3 +86,4 @@ services:
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
       - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+#      - logging.level.com.atomikos=TRACE
