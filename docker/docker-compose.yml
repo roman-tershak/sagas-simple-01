@@ -51,7 +51,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
-      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616?jms.redeliveryPolicy.maximumRedeliveries=-1
 #      - logging.level.org.hibernate=WARN
   reservation-service:
     image: saga-tests-simple-1/reservation-service:1.0-NEST-TRANS
@@ -68,7 +68,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
-      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616?jms.redeliveryPolicy.maximumRedeliveries=-1
 #      - logging.level.org.hibernate=WARN
   cart-service:
     image: saga-tests-simple-1/cart-service:1.0-NEST-TRANS
@@ -85,5 +85,5 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadbsrv:3306/sagasimple1
       - SPRING_DATASOURCE_USERNAME=sagau
       - SPRING_DATASOURCE_PASSWORD=sagahtgrfe
-      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616
+      - SPRING_ACTIVEMQ_BROKER_URL=tcp://activemqsrv:61616?jms.redeliveryPolicy.maximumRedeliveries=-1
 #      - logging.level.org.springframework=DEBUG
