@@ -80,6 +80,32 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     }
 
     @Test
+    public void testReservationCompletedEventIsNotSentTwiceWhenCartApprovedEventAreDoubled() throws Exception {
+        Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
+        reservationRepository.save(pendingReservation);
+        String reservationId = pendingReservation.getId();
+
+        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
+                reservationId,
+                CART_NUMBER, ORDER_ID, USER_ID);
+        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+
+        Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(
+                reservationId, CONFIRMED, 5000L);
+        assertThat(reservation, is(notNullValue()));
+        assertThat(reservation.getOrderId(), is(ORDER_ID));
+        assertThat(reservation.getUserId(), is(USER_ID));
+
+        assertThat(reservationConfirmedEventReceiver.pollEvent(
+                e -> e.getReservationId().equals(reservationId)), is(notNullValue()));
+        assertThat(reservationConfirmedEventReceiver.pollEvent(
+                e -> e.getReservationId().equals(reservationId)), is(nullValue()));
+
+        assertThat(reservationRepository.count(), is(1L));
+    }
+
+    @Test
     public void testReservationErrorEventIsSentWhenNoPendingReservationIsFound() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);

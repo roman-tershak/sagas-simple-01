@@ -10,6 +10,7 @@ import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.order.entities.Order;
 import rt.sagas.order.entities.OrderStatus;
 import rt.sagas.order.repositories.OrderRepository;
+import rt.sagas.order.services.OrderService;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
@@ -22,27 +23,18 @@ public class ReservationEventsListener {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
     @Transactional
     @JmsListener(destination = RESERVATION_CONFIRMED_EVENT_QUEUE)
     public void receiveMessage(@Payload ReservationConfirmedEvent reservationConfirmedEvent) {
-        final Long orderId = reservationConfirmedEvent.getOrderId();
-
         LOGGER.info("Reservation Confirmed Event received: {}", reservationConfirmedEvent);
 
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
+        orderService.completeOrder(
+                reservationConfirmedEvent.getReservationId(),
+                reservationConfirmedEvent.getOrderId());
 
-            order.setReservationId(reservationConfirmedEvent.getReservationId());
-            order.setStatus(OrderStatus.COMPLETE);
-            orderRepository.save(order);
-
-        } else {
-            LOGGER.error("Order not found for Reservation Confirmed Event: {}",
-                    reservationConfirmedEvent);
-        }
+        LOGGER.info("About ro complete Reservation Confirmed Event handling: {}", reservationConfirmedEvent);
     }
 
 }

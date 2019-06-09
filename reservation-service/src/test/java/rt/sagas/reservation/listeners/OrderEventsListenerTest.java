@@ -61,6 +61,25 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
     }
 
     @Test
+    public void testReservationCreatedEventIsNotSentTwiceOnDoubleOrderCreatedEvent() throws Exception {
+        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER);
+        jmsSender.send(ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
+        jmsSender.send(ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
+
+        Reservation reservation = waitAndGetReservationsByOrderIdAndStatusFromDb(
+                ORDER_ID, PENDING, 10000L);
+        assertThat(reservation.getOrderId(), is(ORDER_ID));
+        assertThat(reservation.getUserId(), is(USER_ID));
+
+        assertThat(reservationCreatedEventReceiver.pollEvent(
+                e -> e.getOrderId().equals(reservation.getOrderId()),10000L), is(notNullValue()));
+        assertThat(reservationCreatedEventReceiver.pollEvent(
+                e -> e.getOrderId().equals(reservation.getOrderId()),10000L), is(nullValue()));
+
+        assertThat(reservationRepository.count(), is(1L));
+    }
+
+    @Test
     public void testPendingReservationIsNotCreatedIfItAlreadyHasBeenCreatedForAGivenOrderId() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);

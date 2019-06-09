@@ -12,6 +12,8 @@ import rt.sagas.events.ReservationCreatedEvent;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.reservation.repositories.ReservationRepository;
+import rt.sagas.reservation.services.ReservationEventsSender;
+import rt.sagas.reservation.services.ReservationService;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -25,11 +27,9 @@ public class OrderEventsListener {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Autowired
-    private ReservationFactory reservationFactory;
-    @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private ReservationService reservationService;
 
     @Transactional
     @JmsListener(destination = ORDER_CREATED_EVENT_QUEUE)
@@ -37,22 +37,11 @@ public class OrderEventsListener {
 
         LOGGER.info("Order Created Event received: {}", orderCreatedEvent);
 
-        Long orderId = orderCreatedEvent.getOrderId();
-        Long userId = orderCreatedEvent.getUserId();
+        reservationService.createReservation(
+                orderCreatedEvent.getOrderId(),
+                orderCreatedEvent.getUserId(),
+                orderCreatedEvent.getCartNumber());
 
-        List<Reservation> reservationsByOrderId = reservationRepository.findAllByOrderId(orderId);
-        if (reservationsByOrderId.size() == 0) {
-            Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
-            reservationRepository.save(reservation);
-
-            ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
-                    reservation.getId(), orderId, userId, orderCreatedEvent.getCartNumber());
-
-            jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
-
-            LOGGER.info("Reservation Created Event sent: {}", reservationCreatedEvent);
-        } else {
-            LOGGER.error("Reservations for Order Id {} has already been created", orderId);
-        }
+        LOGGER.info("About to complete Order Created Event handling: {}", orderCreatedEvent);
     }
 }

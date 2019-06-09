@@ -14,6 +14,8 @@ import rt.sagas.order.entities.Order;
 import rt.sagas.order.entities.OrderStatus;
 import rt.sagas.testutils.JmsSender;
 
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
@@ -55,10 +57,24 @@ public class ReservationEventsListenerTest extends AbstractOrderTest {
         jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
-
+        assertThat(order, is(notNullValue()));
         assertThat(order.getStatus(), is(OrderStatus.COMPLETE));
         assertThat(order.getUserId(), is(USER_ID));
         assertThat(order.getReservationId(), is(RESERVATION_ID));
+    }
+
+    @Test
+    public void testOrderBecomesCompletedOnReservationFinalizedEventSentTwice() throws Exception {
+        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
+                RESERVATION_ID, orderId, USER_ID);
+
+        jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+        jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
+
+        Order order = waitTillCompletedAndGetOrderFromDb(5000L);
+        assertThat(order, is(notNullValue()));
+        orderRepositorySpy.delete(order);
+        assertThat(waitTillCompletedAndGetOrderFromDb(5000L), is(nullValue()));
     }
 
     @Test
@@ -71,7 +87,7 @@ public class ReservationEventsListenerTest extends AbstractOrderTest {
         jmsSender.send(RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         Order order = waitTillCompletedAndGetOrderFromDb(5000L);
-
+        assertThat(order, is(notNullValue()));
         assertThat(order.getStatus(), is(OrderStatus.NEW));
         assertThat(order.getUserId(), is(USER_ID));
         assertThat(order.getReservationId(), is(nullValue()));
@@ -79,16 +95,18 @@ public class ReservationEventsListenerTest extends AbstractOrderTest {
 
     private Order waitTillCompletedAndGetOrderFromDb(long waitTimeout) throws InterruptedException {
         long stop = System.currentTimeMillis() + waitTimeout;
-        Order order;
+        Order order = null;
         do {
-            order = orderRepositorySpy.findById(orderId).get();
-            assertThat(order, is(notNullValue()));
+            Optional<Order> optionalOrder = orderRepositorySpy.findById(orderId);
+            if (optionalOrder.isPresent()) {
 
-            if (order.getStatus() == OrderStatus.COMPLETE) {
-                break;
-            } else {
-                Thread.sleep(100L);
+                order = optionalOrder.get();
+
+                if (order.getStatus() == OrderStatus.COMPLETE) {
+                    break;
+                }
             }
+            Thread.sleep(100L);
         } while (System.currentTimeMillis() < stop);
 
         return order;

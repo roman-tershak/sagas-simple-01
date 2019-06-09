@@ -10,6 +10,8 @@ import rt.sagas.cart.repositories.TransactionRepository;
 
 import javax.transaction.Transactional;
 
+import java.util.Optional;
+
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @Service
@@ -25,12 +27,19 @@ public class TransactionService {
     @Transactional(REQUIRES_NEW)
     public void authorizeTransaction(String reservationId, Long orderId, Long userId, String cartNumber) {
 
-        cartEventsSender.sendCartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
+        Optional<Transaction> mayAlreadyExist = transactionRepository.findByOrderId(orderId);
+        if (mayAlreadyExist.isPresent()) {
 
-        Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
-        transactionRepository.save(transaction);
+            LOGGER.warn("Transaction {} has already been created", mayAlreadyExist.get());
 
-        LOGGER.info("About to authorize Transaction: {}", transaction);
+        } else {
+            Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
+            transactionRepository.save(transaction);
+
+            cartEventsSender.sendCartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
+
+            LOGGER.info("About to authorize Transaction: {}", transaction);
+        }
     }
 
 }

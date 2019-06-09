@@ -32,6 +32,10 @@ public class ReservationEventsListener {
         Long userId = reservationCreatedEvent.getUserId();
         String cartNumber = reservationCreatedEvent.getCartNumber();
 
+        try {
+            Thread.sleep(10L);
+        } catch (InterruptedException e) {}
+
         transactionService.authorizeTransaction(reservationId, orderId, userId, cartNumber);
 
         LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
