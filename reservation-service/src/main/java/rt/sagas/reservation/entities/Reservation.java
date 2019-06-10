@@ -1,15 +1,13 @@
 package rt.sagas.reservation.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity(name = "RESERVATIONS")
 public class Reservation {
 
     @Id
     private String id;
+    @Column(unique = true)
     private Long orderId;
     private Long userId;
     @Enumerated(EnumType.STRING)
