@@ -44,7 +44,7 @@ public class ReservationService {
     }
 
     @Transactional(REQUIRES_NEW)
-    public void confirmReservation(String reservationId, Long orderId, Long userId, String cartNumber) {
+    public void confirmReservation(String reservationId, Long orderId, Long userId) {
 
         Optional<Reservation> optional = reservationRepository.findById(reservationId);
 
@@ -62,7 +62,14 @@ public class ReservationService {
                 LOGGER.warn("Reservation: {} is not PENDING, skipping", reservation);
             }
         } else {
-            reservationEventsSender.sendReservationMissedError(reservationId, orderId, userId, cartNumber);
+            Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
+            reservation.setStatus(CONFIRMED);
+            reservationRepository.save(reservation);
+
+            reservationEventsSender.sendReservationConfirmedEvent(
+                    reservationId, orderId, userId);
+
+            LOGGER.warn("Reservation: {} did not exist, creating it", reservation);
         }
     }
 }

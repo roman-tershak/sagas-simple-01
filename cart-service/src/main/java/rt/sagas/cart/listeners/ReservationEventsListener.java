@@ -25,19 +25,19 @@ public class ReservationEventsListener {
     @Transactional
     @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
     public void receiveMessage(@Payload ReservationCreatedEvent reservationCreatedEvent) {
-        LOGGER.info("Reservation Created Event received: {}", reservationCreatedEvent);
-
-        String reservationId = reservationCreatedEvent.getReservationId();
-        Long orderId = reservationCreatedEvent.getOrderId();
-        Long userId = reservationCreatedEvent.getUserId();
-        String cartNumber = reservationCreatedEvent.getCartNumber();
-
         try {
-            Thread.sleep(10L);
-        } catch (InterruptedException e) {}
+            LOGGER.info("Reservation Created Event received: {}", reservationCreatedEvent);
 
-        transactionService.authorizeTransaction(reservationId, orderId, userId, cartNumber);
+            transactionService.authorizeTransaction(
+                    reservationCreatedEvent.getReservationId(),
+                    reservationCreatedEvent.getOrderId(),
+                    reservationCreatedEvent.getUserId(),
+                    reservationCreatedEvent.getCartNumber());
 
-        LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
+            LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
+        } catch (Exception e) {
+            LOGGER.error("An exception occurred in Reservation Created Event handling: {}, {}", reservationCreatedEvent, e);
+            throw e;
+        }
     }
 }

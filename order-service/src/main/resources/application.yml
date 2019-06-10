@@ -26,3 +26,8 @@ spring:
   jms:
     template:
       time-to-live: 1h
+      qos-enabled: true
+#    redelivery-policy:
+#      maximum-redeliveries: 100
+#      redelivery-delay: 1000
+#      initial-redelivery-delay: 5000

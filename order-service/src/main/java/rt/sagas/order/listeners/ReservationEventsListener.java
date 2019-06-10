@@ -7,13 +7,9 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import rt.sagas.events.ReservationConfirmedEvent;
-import rt.sagas.order.entities.Order;
-import rt.sagas.order.entities.OrderStatus;
-import rt.sagas.order.repositories.OrderRepository;
 import rt.sagas.order.services.OrderService;
 
 import javax.transaction.Transactional;
-import java.util.Optional;
 
 import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 
@@ -28,13 +24,17 @@ public class ReservationEventsListener {
     @Transactional
     @JmsListener(destination = RESERVATION_CONFIRMED_EVENT_QUEUE)
     public void receiveMessage(@Payload ReservationConfirmedEvent reservationConfirmedEvent) {
-        LOGGER.info("Reservation Confirmed Event received: {}", reservationConfirmedEvent);
+        try {
+            LOGGER.info("Reservation Confirmed Event received: {}", reservationConfirmedEvent);
 
-        orderService.completeOrder(
-                reservationConfirmedEvent.getReservationId(),
-                reservationConfirmedEvent.getOrderId());
+            orderService.completeOrder(
+                    reservationConfirmedEvent.getReservationId(),
+                    reservationConfirmedEvent.getOrderId());
 
-        LOGGER.info("About ro complete Reservation Confirmed Event handling: {}", reservationConfirmedEvent);
+            LOGGER.info("About to complete Reservation Confirmed Event handling: {}", reservationConfirmedEvent);
+        } catch (Exception e) {
+            LOGGER.error("An exception occurred in Reservation Confirmed Event handling: {}, {}", reservationConfirmedEvent, e);
+            throw e;
+        }
     }
-
 }

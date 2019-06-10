@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import rt.sagas.events.QueueNames;
 import rt.sagas.events.ReservationConfirmedEvent;
 import rt.sagas.events.ReservationCreatedEvent;
-import rt.sagas.events.ReservationErrorEvent;
-import rt.sagas.reservation.entities.Reservation;
-import rt.sagas.reservation.repositories.ReservationRepository;
 
 import javax.transaction.Transactional;
 
@@ -43,18 +40,5 @@ public class ReservationEventsSender {
         jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
 
         LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
-    }
-
-    @Transactional
-    public void sendReservationMissedError(String reservationId, Long orderId, Long userId, String cartNumber) {
-        ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
-                reservationId,
-                orderId,
-                userId,
-                cartNumber,
-                "The Reservation '" + reservationId + "' does not exist");
-        jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
-
-        LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
     }
 }

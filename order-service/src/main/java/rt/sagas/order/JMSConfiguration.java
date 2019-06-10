@@ -16,11 +16,20 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
+import static javax.jms.Session.SESSION_TRANSACTED;
+
 @Configuration
 public class JMSConfiguration {
 
     @Value("${spring.activemq.broker-url}")
     private String brokerUrl;
+
+    @Value("${spring.jms.redelivery-policy.maximum-redeliveries:100}")
+    private Integer maximumRedeliveries;
+    @Value("${spring.jms.redelivery-policy.redelivery-delay:1000}")
+    private Long redeliveryDelay;
+    @Value("${spring.jms.redelivery-policy.initial-redelivery-delay:5000}")
+    private Long initialRedeliveryDelay;
 
     @Bean
     public JmsTemplate jmsTemplate() {
@@ -33,6 +42,8 @@ public class JMSConfiguration {
     @Bean("jmsListenerContainerFactory")
     public JmsListenerContainerFactory queueListenerFactory() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setSessionTransacted(true);
+        factory.setSessionAcknowledgeMode(SESSION_TRANSACTED);
         factory.setMessageConverter(messageConverter());
         factory.setConnectionFactory(activeMQConnectionFactory());
         return factory;
@@ -48,9 +59,9 @@ public class JMSConfiguration {
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
 
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        redeliveryPolicy.setInitialRedeliveryDelay(5000L);
-        redeliveryPolicy.setRedeliveryDelay(1000L);
-        redeliveryPolicy.setMaximumRedeliveries(-1);
+        redeliveryPolicy.setMaximumRedeliveries(maximumRedeliveries);
+        redeliveryPolicy.setInitialRedeliveryDelay(initialRedeliveryDelay);
+        redeliveryPolicy.setRedeliveryDelay(redeliveryDelay);
         activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
 
         activeMQConnectionFactory.setBrokerURL(brokerUrl);

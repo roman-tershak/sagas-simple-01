@@ -24,15 +24,18 @@ public class CartEvensListener {
     @Transactional
     @JmsListener(destination = CART_AUTHORIZED_EVENT_QUEUE)
     public void receiveMessage(@Payload CartAuthorizedEvent cartAuthorizedEvent) {
-        LOGGER.info("Cart Authorized Event received: {}", cartAuthorizedEvent);
+        try {
+            LOGGER.info("Cart Authorized Event received: {}", cartAuthorizedEvent);
 
-        reservationService.confirmReservation(
-                cartAuthorizedEvent.getReservationId(),
-                cartAuthorizedEvent.getOrderId(),
-                cartAuthorizedEvent.getUserId(),
-                cartAuthorizedEvent.getCartNumber());
+            reservationService.confirmReservation(
+                    cartAuthorizedEvent.getReservationId(),
+                    cartAuthorizedEvent.getOrderId(),
+                    cartAuthorizedEvent.getUserId());
 
-        LOGGER.info("About to complete Cart Authorized Event handling: {}", cartAuthorizedEvent);
+            LOGGER.info("About to complete Cart Authorized Event handling: {}", cartAuthorizedEvent);
+        } catch (Exception e) {
+            LOGGER.error("An exception occurred in Cart Authorized Event handling: {}, {}", cartAuthorizedEvent, e);
+            throw e;
+        }
     }
-
 }
