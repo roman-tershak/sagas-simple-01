@@ -8,3 +8,4 @@ delete from transactions;
 
 select o.*, r.*, t.* from orders o left outer join reservations r on o.id = r.order_id left outer join transactions t on o.id = t.order_id where o.status = 'NEW';
 select r.*, t.* from reservations r left outer join transactions t on r.order_id = t.order_id where r.status = 'PENDING';
+select o.*, r.*, t.* from orders o left outer join reservations r on o.id = r.order_id left outer join transactions t on o.id = t.order_id where (o.status = 'NEW' or r.status = 'PENDING');
