@@ -1,5 +1,7 @@
 package rt.sagas.events;
 
+import java.util.Objects;
+
 public class CartEvent extends SagaEvent {
 
     private String reservationId;
@@ -42,5 +44,21 @@ public class CartEvent extends SagaEvent {
         sb.append(", userId=").append(userId);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CartEvent cartEvent = (CartEvent) o;
+        return Objects.equals(reservationId, cartEvent.reservationId) &&
+                Objects.equals(cartNumber, cartEvent.cartNumber) &&
+                Objects.equals(orderId, cartEvent.orderId) &&
+                Objects.equals(userId, cartEvent.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reservationId, cartNumber, orderId, userId);
     }
 }
