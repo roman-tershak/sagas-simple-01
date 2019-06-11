@@ -22,13 +22,14 @@ public class AbstractListenerTest {
 
         long stop = System.currentTimeMillis() + waitTimeout;
         do {
-            for (Reservation r : reservationRepository.findAllByOrderId(orderId)) {
+            Optional<Reservation> byOrderId = reservationRepository.findByOrderId(orderId);
+            if (byOrderId.isPresent()) {
+                Reservation r = byOrderId.get();
                 if (Objects.equals(r.getStatus(), status)) {
                     return r;
-                } else {
-                    Thread.sleep(100L);
                 }
             }
+            Thread.sleep(100L);
         } while (System.currentTimeMillis() < stop);
 
         return null;
@@ -42,13 +43,11 @@ public class AbstractListenerTest {
             Optional<Reservation> optionalReservation = reservationRepository.findById(reservationId);
             if (optionalReservation.isPresent()) {
                 Reservation reservation = optionalReservation.get();
-
                 if (Objects.equals(reservation.getStatus(), status)) {
                     return reservation;
-                } else {
-                    Thread.sleep(100L);
                 }
             }
+            Thread.sleep(100L);
         } while (System.currentTimeMillis() < stop);
 
         return null;

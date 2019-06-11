@@ -20,6 +20,8 @@ spring:
 #    password: admin
 
   jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    show-sql: false
     hibernate:
       ddl-auto: update
 

@@ -9,7 +9,6 @@ import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
 
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
@@ -30,9 +29,9 @@ public class ReservationService {
 
     @Transactional(REQUIRES_NEW)
     public void createReservation(Long orderId, Long userId, String cartNumber) {
-        List<Reservation> reservationsByOrderId = reservationRepository.findAllByOrderId(orderId);
+        Optional<Reservation> reservationsByOrderId = reservationRepository.findByOrderId(orderId);
 
-        if (reservationsByOrderId.size() == 0) {
+        if (!reservationsByOrderId.isPresent()) {
             Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
             reservationRepository.save(reservation);
 
@@ -46,30 +45,26 @@ public class ReservationService {
     @Transactional(REQUIRES_NEW)
     public void confirmReservation(String reservationId, Long orderId, Long userId) {
 
-        Optional<Reservation> optional = reservationRepository.findById(reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId).orElseGet(() -> {
+            LOGGER.warn("Reservation with id {} does not exist, looking for one with orderId {}",
+                    reservationId, orderId);
 
-        if (optional.isPresent()) {
-            Reservation reservation = optional.get();
+            return reservationRepository.findByOrderId(orderId).orElseGet(() -> {
+                LOGGER.warn("Reservation for orderId {} does not exist, creating it", orderId);
 
-            if (reservation.getStatus() == PENDING) {
+                return reservationFactory.createNewPendingReservationFor(orderId, userId);
+            });
+        });
 
-                reservation.setStatus(CONFIRMED);
-                reservationRepository.save(reservation);
+        if (reservation.getStatus() == PENDING) {
 
-                reservationEventsSender.sendReservationConfirmedEvent(
-                        reservationId, orderId, userId);
-            } else {
-                LOGGER.warn("Reservation: {} is not PENDING, skipping", reservation);
-            }
-        } else {
-            Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
             reservation.setStatus(CONFIRMED);
             reservationRepository.save(reservation);
 
             reservationEventsSender.sendReservationConfirmedEvent(
                     reservationId, orderId, userId);
-
-            LOGGER.warn("Reservation: {} did not exist, creating it", reservation);
+        } else {
+            LOGGER.warn("Reservation: {} is not PENDING, skipping", reservation);
         }
     }
 }

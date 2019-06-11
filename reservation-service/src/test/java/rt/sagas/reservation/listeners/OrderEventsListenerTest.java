@@ -13,7 +13,7 @@ import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.testutils.JmsSender;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -91,9 +91,9 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
                 e -> e.getOrderId().equals(ORDER_ID), 10000L);
         assertThat(reservationCreatedEvent, is(nullValue()));
 
-        List<Reservation> reservationsFromDb = reservationRepository.findAllByOrderId(ORDER_ID);
-        assertThat(reservationsFromDb.size(), is(1));
-        Reservation reservationFromDb = reservationsFromDb.get(0);
+        Optional<Reservation> byOrderId = reservationRepository.findByOrderId(ORDER_ID);
+        assertThat(byOrderId.isPresent(), is(true));
+        Reservation reservationFromDb = byOrderId.get();
         assertThat(reservationFromDb.getId(), is(pendingReservation.getId()));
         assertThat(reservationFromDb.getOrderId(), is(pendingReservation.getOrderId()));
         assertThat(reservationFromDb.getUserId(), is(pendingReservation.getUserId()));
