@@ -4,6 +4,9 @@ public class TestEvent extends SagaEvent {
 
     private String eventMessage;
 
+    public TestEvent() {
+    }
+
     public TestEvent(String eventMessage) {
         this.eventMessage = eventMessage;
     }

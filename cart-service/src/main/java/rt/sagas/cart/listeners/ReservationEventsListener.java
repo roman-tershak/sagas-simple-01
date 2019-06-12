@@ -1,16 +1,19 @@
 package rt.sagas.cart.listeners;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import rt.sagas.cart.services.EventService;
 import rt.sagas.cart.services.TransactionService;
 import rt.sagas.events.ReservationCreatedEvent;
+import rt.sagas.events.services.EventService;
 
+import javax.jms.TextMessage;
 import javax.transaction.Transactional;
 
 import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
@@ -23,12 +26,18 @@ public class ReservationEventsListener {
     @Autowired
     private TransactionService transactionService;
     @Autowired
+    @Qualifier("transactionEventService")
     private EventService eventService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Transactional
     @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
-    public void receiveMessage(@Payload ReservationCreatedEvent reservationCreatedEvent) throws Exception {
+    public void receiveMessage(@Payload TextMessage textMessage) throws Exception {
         try {
+            ReservationCreatedEvent reservationCreatedEvent = objectMapper.readValue(
+                    textMessage.getText(), ReservationCreatedEvent.class);
+
             LOGGER.info("Reservation Created Event received: {}", reservationCreatedEvent);
 
             transactionService.authorizeTransaction(
@@ -41,7 +50,7 @@ public class ReservationEventsListener {
 
             LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
         } catch (Exception e) {
-            LOGGER.error("An exception occurred in Reservation Created Event handling: {}, {}", reservationCreatedEvent, e);
+            LOGGER.error("An exception occurred in Reservation Created Event handling: {}, {}", textMessage, e);
             throw e;
         }
     }

@@ -5,12 +5,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
-import rt.sagas.cart.services.EventService;
+import rt.sagas.events.services.EventService;
 
 import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 
 @SpringBootApplication
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = {
+        "rt.sagas.cart.repositories",
+        "rt.sagas.events.repositories"
+})
 @EnableJms
 public class Application {
 

@@ -9,6 +9,7 @@ import rt.sagas.cart.entities.Transaction;
 import rt.sagas.cart.entities.TransactionStatus;
 import rt.sagas.cart.repositories.TransactionRepository;
 import rt.sagas.events.CartAuthorizedEvent;
+import rt.sagas.events.services.EventService;
 
 import javax.transaction.Transactional;
 import java.util.Optional;

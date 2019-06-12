@@ -51,7 +51,7 @@ public class EventService {
             count.incrementAndGet();
         });
 
-        if (count.get() > 1) {
+        if (count.get() != 1) {
             LOGGER.info("A batch of events {} sent", count);
         }
     }
