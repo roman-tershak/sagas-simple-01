@@ -1,5 +1,6 @@
 package rt.sagas.testutils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import rt.sagas.events.SagaEvent;
 
 import java.util.Optional;
@@ -9,16 +10,27 @@ import java.util.function.Predicate;
 
 public abstract class JmsReceiver<E extends SagaEvent> {
 
-    private LinkedBlockingQueue<E> events = new LinkedBlockingQueue<>();
+    public static final long DEFAULT_TIMEOUT = 10000L;
 
-    public abstract void receiveMessage(E event);
+    private LinkedBlockingQueue<E> events = new LinkedBlockingQueue<>();
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private Class<E> eventClass;
+
+    public JmsReceiver(Class<E> eventClass) {
+        this.eventClass = eventClass;
+    }
+
+    public void receiveMessage(String message) throws Exception {
+        E event = objectMapper.readValue(message, eventClass);
+        addEvent(event);
+    }
 
     public void addEvent(E event) {
         events.add(event);
     }
 
     public E pollEvent() throws InterruptedException {
-        return pollEvent(10000L);
+        return pollEvent(DEFAULT_TIMEOUT);
     }
 
     public E pollEvent(long timeout) throws InterruptedException {
@@ -26,7 +38,7 @@ public abstract class JmsReceiver<E extends SagaEvent> {
     }
 
     public E pollEvent(Predicate<E> predicate) throws InterruptedException {
-        return pollEvent(predicate, 10000L);
+        return pollEvent(predicate, DEFAULT_TIMEOUT);
     }
 
     public E pollEvent(Predicate<E> predicate, long timeout) throws InterruptedException {

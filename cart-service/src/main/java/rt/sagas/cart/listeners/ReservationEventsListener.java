@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import rt.sagas.cart.services.EventService;
 import rt.sagas.cart.services.TransactionService;
 import rt.sagas.events.ReservationCreatedEvent;
 
@@ -21,10 +22,12 @@ public class ReservationEventsListener {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private EventService eventService;
 
     @Transactional
     @JmsListener(destination = RESERVATION_CREATED_EVENT_QUEUE)
-    public void receiveMessage(@Payload ReservationCreatedEvent reservationCreatedEvent) {
+    public void receiveMessage(@Payload ReservationCreatedEvent reservationCreatedEvent) throws Exception {
         try {
             LOGGER.info("Reservation Created Event received: {}", reservationCreatedEvent);
 
@@ -33,6 +36,8 @@ public class ReservationEventsListener {
                     reservationCreatedEvent.getOrderId(),
                     reservationCreatedEvent.getUserId(),
                     reservationCreatedEvent.getCartNumber());
+
+            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
         } catch (Exception e) {

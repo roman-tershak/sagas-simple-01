@@ -3,13 +3,14 @@ package rt.sagas.cart.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import rt.sagas.cart.entities.Transaction;
 import rt.sagas.cart.entities.TransactionStatus;
 import rt.sagas.cart.repositories.TransactionRepository;
+import rt.sagas.events.CartAuthorizedEvent;
 
 import javax.transaction.Transactional;
-
 import java.util.Optional;
 
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
@@ -21,24 +22,28 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
     @Autowired
-    private CartEventsSender cartEventsSender;
+    @Qualifier("transactionEventService")
+    private EventService eventService;
 
     @Transactional(REQUIRES_NEW)
-    public void authorizeTransaction(String reservationId, Long orderId, Long userId, String cartNumber) {
+    public void authorizeTransaction(String reservationId, Long orderId, Long userId, String cartNumber)
+            throws Exception {
 
         Optional<Transaction> mayAlreadyExist = transactionRepository.findByOrderId(orderId);
-        if (mayAlreadyExist.isPresent()) {
+        if (!mayAlreadyExist.isPresent()) {
 
-            LOGGER.warn("Transaction {} has already been created", mayAlreadyExist.get());
-
-        } else {
             Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
             transactionRepository.save(transaction);
 
-            cartEventsSender.sendCartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
+            eventService.storeOutgoingEvent(new CartAuthorizedEvent(reservationId, cartNumber, orderId, userId));
 
-            LOGGER.info("About to authorize Transaction: {}", transaction);
+            LOGGER.info("Transaction {} authorized", transaction);
+        } else {
+
+            LOGGER.warn("Transaction {} has already been created", mayAlreadyExist.get());
+
         }
     }
 

@@ -5,15 +5,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
-import rt.sagas.events.CartAuthorizedEvent;
 
 import javax.transaction.Transactional;
 
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
-import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 
 @Component
-public class CartEventsSender {
+public class EventsSender {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -21,11 +19,12 @@ public class CartEventsSender {
     private JmsTemplate jmsTemplate;
 
     @Transactional(REQUIRES_NEW)
-    public void sendCartAuthorizedEvent(String reservationId, String cartNumber, Long orderId, Long userId) {
+    public void sendEvent(String destination, String event) {
 
-        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
-        jmsTemplate.convertAndSend(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
+        jmsTemplate.send(destination, session -> {
+            return session.createTextMessage(event);
+        });
 
-        LOGGER.info("Cart Authorized Event sent: {}", cartAuthorizedEvent);
+        LOGGER.info("Event sent: {}", event);
     }
 }

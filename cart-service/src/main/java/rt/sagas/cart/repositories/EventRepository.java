@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import rt.sagas.cart.entities.EventEntity;
 
 @Repository
-public interface TransactionEventRepository extends CrudRepository<EventEntity, Long> {
+public interface EventRepository extends CrudRepository<EventEntity, Long> {
 }

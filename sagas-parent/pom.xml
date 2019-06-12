@@ -15,6 +15,7 @@
         <module>../reservation-service</module>
         <module>../cart-service</module>
         <module>../test-loader</module>
+        <module>../events-api-impl</module>
     </modules>
 
     <properties>
