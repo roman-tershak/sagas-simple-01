@@ -3,7 +3,6 @@ package rt.sagas.cart.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import rt.sagas.cart.entities.Transaction;
 import rt.sagas.cart.entities.TransactionStatus;
@@ -23,9 +22,7 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
     @Autowired
-    @Qualifier("transactionEventService")
     private EventService eventService;
 
     @Transactional(REQUIRES_NEW)
@@ -42,9 +39,7 @@ public class TransactionService {
 
             LOGGER.info("Transaction {} authorized", transaction);
         } else {
-
             LOGGER.warn("Transaction {} has already been created", mayAlreadyExist.get());
-
         }
     }
 

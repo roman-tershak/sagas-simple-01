@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rt.sagas.events.CartAuthorizedEvent;
+import rt.sagas.events.ReservationConfirmedEvent;
+import rt.sagas.events.services.EventService;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.reservation.repositories.ReservationRepository;
@@ -25,25 +28,29 @@ public class ReservationService {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private ReservationEventsSender reservationEventsSender;
+    private EventService eventService;
 
     @Transactional(REQUIRES_NEW)
-    public void createReservation(Long orderId, Long userId, String cartNumber) {
-        Optional<Reservation> reservationsByOrderId = reservationRepository.findByOrderId(orderId);
+    public void createReservation(Long orderId, Long userId, String cartNumber)
+            throws Exception {
 
+        Optional<Reservation> reservationsByOrderId = reservationRepository.findByOrderId(orderId);
         if (!reservationsByOrderId.isPresent()) {
+
             Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
             reservationRepository.save(reservation);
 
-            reservationEventsSender.sendReservationCreatedEvent(
-                    reservation.getId(), orderId, userId, cartNumber);
+            eventService.storeOutgoingEvent(new CartAuthorizedEvent(
+                    reservation.getId(), cartNumber, reservation.getOrderId(), reservation.getUserId()));
+
+            LOGGER.info("Reservation {} created", reservation);
         } else {
             LOGGER.warn("Reservations for Order Id {} has already been created", orderId);
         }
     }
 
     @Transactional(REQUIRES_NEW)
-    public void confirmReservation(String reservationId, Long orderId, Long userId) {
+    public void confirmReservation(String reservationId, Long orderId, Long userId) throws Exception {
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseGet(() -> {
             LOGGER.warn("Reservation with id {} does not exist, looking for one with orderId {}",
@@ -61,8 +68,10 @@ public class ReservationService {
             reservation.setStatus(CONFIRMED);
             reservationRepository.save(reservation);
 
-            reservationEventsSender.sendReservationConfirmedEvent(
-                    reservationId, orderId, userId);
+            eventService.storeOutgoingEvent(new ReservationConfirmedEvent(
+                    reservation.getId(), reservation.getOrderId(), reservation.getUserId()));
+
+            LOGGER.info("Reservation {} confirmed", reservation);
         } else {
             LOGGER.warn("Reservation: {} is not PENDING, skipping", reservation);
         }

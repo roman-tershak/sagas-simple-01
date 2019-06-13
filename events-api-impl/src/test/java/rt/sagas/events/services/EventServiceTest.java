@@ -1,27 +1,27 @@
 package rt.sagas.events.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import rt.sagas.events.TestEvent;
-import rt.sagas.events.listeners.JmsTestEventReceiver;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import rt.sagas.events.TestEvent;
 import rt.sagas.events.entities.EventEntity;
+import rt.sagas.events.listeners.JmsTestEventReceiver;
 import rt.sagas.events.repositories.EventRepository;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static rt.sagas.events.TestConfiguration.TEST_DESTINATION;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class EventServiceTest {
 
     @Autowired
-    @Qualifier("testEventService")
     private EventService unit;
     @Autowired
     private EventRepository eventRepository;
@@ -52,7 +52,7 @@ public class EventServiceTest {
     public void testTransactionEventIsSentToTheQueue() throws Exception {
         unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-AAABBBB"));
 
-        unit.sendOutgoingEvents();
+        unit.sendOutgoingEvents(TEST_DESTINATION);
 
         TestEvent cartAuthorizedEvent = cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAABBBB"), 10000L);
@@ -64,7 +64,7 @@ public class EventServiceTest {
         unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-AAAAAAA"));
         unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-BBBBBBB"));
 
-        unit.sendOutgoingEvents();
+        unit.sendOutgoingEvents(TEST_DESTINATION);
 
         assertThat(cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAAAAAA"), 10000L),
@@ -80,7 +80,7 @@ public class EventServiceTest {
         unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-DDDDDDD"));
         assertThat(eventRepository.count(), is(2L));
 
-        unit.sendOutgoingEvents();
+        unit.sendOutgoingEvents(TEST_DESTINATION);
 
         assertThat(eventRepository.count(), is(0L));
     }

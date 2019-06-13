@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,7 @@ import rt.sagas.events.services.EventService;
 import javax.jms.TextMessage;
 import javax.transaction.Transactional;
 
+import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
@@ -26,7 +26,6 @@ public class ReservationEventsListener {
     @Autowired
     private TransactionService transactionService;
     @Autowired
-    @Qualifier("transactionEventService")
     private EventService eventService;
     @Autowired
     private ObjectMapper objectMapper;
@@ -46,7 +45,7 @@ public class ReservationEventsListener {
                     reservationCreatedEvent.getUserId(),
                     reservationCreatedEvent.getCartNumber());
 
-            eventService.sendOutgoingEvents();
+            eventService.sendOutgoingEvents(CART_AUTHORIZED_EVENT_QUEUE);
 
             LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
         } catch (Exception e) {

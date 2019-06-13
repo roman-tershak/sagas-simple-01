@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import rt.sagas.events.SagaEvent;
 import rt.sagas.events.entities.EventEntity;
 import rt.sagas.events.repositories.EventRepository;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
+@Service
 public class EventService {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -25,12 +27,6 @@ public class EventService {
     @Autowired
     private EventSender eventSender;
 
-    private String destination;
-
-    public EventService(String destination) {
-        this.destination = destination;
-    }
-
     @Transactional(REQUIRED)
     public void storeOutgoingEvent(SagaEvent event) throws Exception {
         EventEntity eventEntity = new EventEntity(objectMapper.writeValueAsString(event));
@@ -40,7 +36,7 @@ public class EventService {
     }
 
     @Transactional(REQUIRES_NEW)
-    public void sendOutgoingEvents() {
+    public void sendOutgoingEvents(String destination) {
         AtomicInteger count = new AtomicInteger();
 
         eventRepository.findAll().forEach(eventEntity -> {
@@ -52,7 +48,7 @@ public class EventService {
         });
 
         if (count.get() != 1) {
-            LOGGER.info("A batch of events {} sent", count);
+            LOGGER.info("A batch of events {} sent to {}", count, destination);
         }
     }
 }

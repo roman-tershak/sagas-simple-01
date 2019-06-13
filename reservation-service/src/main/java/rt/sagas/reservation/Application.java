@@ -6,7 +6,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
 
 @SpringBootApplication
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = {
+        "rt.sagas.reservation.repositories",
+        "rt.sagas.events.repositories"
+})
 @EnableJms
 public class Application {
 

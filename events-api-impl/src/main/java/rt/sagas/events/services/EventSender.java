@@ -25,6 +25,6 @@ public class EventSender {
             return session.createTextMessage(event);
         });
 
-        LOGGER.info("Event sent: {}", event);
+        LOGGER.info("Event {} sent to {}", event, destination);
     }
 }

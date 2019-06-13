@@ -11,15 +11,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.OrderCreatedEvent;
 import rt.sagas.order.AbstractOrderTest;
 import rt.sagas.order.JmsOrderCreatedEventReceiver;
+import rt.sagas.order.OrderRepositorySpy;
 import rt.sagas.order.entities.Order;
-import rt.sagas.order.repositories.OrderRepository;
-import rt.sagas.order.services.OrderEventsSender;
-import rt.sagas.testutils.TestRuntimeException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,26 +26,17 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
     @Autowired
     private JmsOrderCreatedEventReceiver jmsOrderCreatedEventReceiver;
     @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private OrderEventsSender orderEventsSenderSpy;
+    private OrderRepositorySpy orderRepositorySpy;
 
     @After
     public void tearDown() throws Exception {
-        doAnswer(invocationOnMock -> {
-            return invocationOnMock.callRealMethod();
-        }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
-
-        orderRepository.deleteAll();
+        orderRepositorySpy.setThrowExceptionInSave(false);
+        orderRepositorySpy.deleteAll();
     }
 
     @Test
     public void testOrderCreatedEventIsNotSentWhenTransactionIsRolledBack() throws Exception {
-
-        doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            throw new TestRuntimeException("Intended exception - ignore");
-        }).when(orderEventsSenderSpy).sendOrderCreatedEvent(any(Order.class));
+        orderRepositorySpy.setThrowExceptionInSave(true);
 
         mvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -60,7 +47,7 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
         assertThat(jmsOrderCreatedEventReceiver.pollEvent(
                 e-> e.getCartNumber().equals("123212321232123212321"),
                 10000L), is(nullValue()));
-        assertThat(orderRepository.count(), is(0L));
+        assertThat(orderRepositorySpy.count(), is(0L));
     }
 
     @Test
@@ -77,8 +64,8 @@ public class OrderControllerEventsFailureTest extends AbstractOrderTest {
         assertThat(orderCreatedEvent, is(notNullValue()));
         assertThat(orderCreatedEvent.getUserId(), is(11L));
 
-        assertThat(orderRepository.count(), is(1L));
-        Order orderCreated = orderRepository.findAll().iterator().next();
+        assertThat(orderRepositorySpy.count(), is(1L));
+        Order orderCreated = orderRepositorySpy.findAll().iterator().next();
         assertThat(orderCreated.getCartNumber(),
                 is("123456784444444444"));
     }

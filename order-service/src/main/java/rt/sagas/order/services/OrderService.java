@@ -4,15 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rt.sagas.events.OrderCreatedEvent;
+import rt.sagas.events.services.EventService;
 import rt.sagas.order.entities.Order;
-import rt.sagas.order.entities.OrderStatus;
 import rt.sagas.order.repositories.OrderRepository;
 
 import javax.transaction.Transactional;
-
 import java.util.Optional;
 
-import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 import static rt.sagas.order.entities.OrderStatus.COMPLETE;
 import static rt.sagas.order.entities.OrderStatus.NEW;
@@ -25,14 +24,17 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
-    private OrderEventsSender eventsSender;
+    private EventService eventService;
 
-    @Transactional(value = REQUIRED, rollbackOn = {Exception.class})
-    public Order createOrder(Order order) {
+    @Transactional(value = REQUIRES_NEW, rollbackOn = {Exception.class})
+    public Order createOrder(Order order) throws Exception {
 
         Order orderSaved = orderRepository.save(order);
+        LOGGER.info("Order {} created", orderSaved);
 
-        eventsSender.sendOrderCreatedEvent(orderSaved);
+        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
+                orderSaved.getId(), orderSaved.getUserId(), orderSaved.getCartNumber());
+        eventService.storeOutgoingEvent(orderCreatedEvent);
 
         return orderSaved;
     }
