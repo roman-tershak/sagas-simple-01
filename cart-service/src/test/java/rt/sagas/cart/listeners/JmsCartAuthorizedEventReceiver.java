@@ -20,6 +20,7 @@ public class JmsCartAuthorizedEventReceiver extends JmsReceiver<CartAuthorizedEv
 
     @Transactional
     @JmsListener(destination = CART_AUTHORIZED_EVENT_QUEUE)
+    @Override
     public void receiveMessage(@Payload TextMessage textMessage) throws Exception {
         super.receiveMessage(textMessage.getText());
     }

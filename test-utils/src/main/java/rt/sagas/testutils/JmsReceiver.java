@@ -1,8 +1,10 @@
 package rt.sagas.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.messaging.handler.annotation.Payload;
 import rt.sagas.events.SagaEvent;
 
+import javax.jms.TextMessage;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,8 @@ public abstract class JmsReceiver<E extends SagaEvent> {
     public JmsReceiver(Class<E> eventClass) {
         this.eventClass = eventClass;
     }
+
+    public abstract void receiveMessage(@Payload TextMessage textMessage) throws Exception;
 
     public void receiveMessage(String message) throws Exception {
         E event = objectMapper.readValue(message, eventClass);

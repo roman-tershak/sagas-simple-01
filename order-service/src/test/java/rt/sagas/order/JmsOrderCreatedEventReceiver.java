@@ -20,6 +20,7 @@ public class JmsOrderCreatedEventReceiver extends JmsReceiver<OrderCreatedEvent>
 
     @Transactional
     @JmsListener(destination = ORDER_CREATED_EVENT_QUEUE)
+    @Override
     public void receiveMessage(@Payload TextMessage textMessage) throws Exception {
         super.receiveMessage(textMessage.getText());
     }
