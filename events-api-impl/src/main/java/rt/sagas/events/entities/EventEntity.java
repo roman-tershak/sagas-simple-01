@@ -11,17 +11,23 @@ public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String destination;
     private String event;
 
     public EventEntity() {
     }
 
-    public EventEntity(String event) {
+    public EventEntity(String destination, String event) {
+        this.destination = destination;
         this.event = event;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getDestination() {
+        return destination;
     }
 
     public String getEvent() {

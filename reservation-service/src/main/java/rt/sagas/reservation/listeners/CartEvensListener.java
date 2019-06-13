@@ -15,7 +15,6 @@ import javax.jms.TextMessage;
 import javax.transaction.Transactional;
 
 import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
-import static rt.sagas.events.QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE;
 
 @Component
 public class CartEvensListener {
@@ -43,7 +42,7 @@ public class CartEvensListener {
                     cartAuthorizedEvent.getOrderId(),
                     cartAuthorizedEvent.getUserId());
 
-            eventService.sendOutgoingEvents(RESERVATION_CONFIRMED_EVENT_QUEUE);
+            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Cart Authorized Event handling: {}", cartAuthorizedEvent);
         } catch (Exception e) {

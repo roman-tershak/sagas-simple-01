@@ -15,7 +15,6 @@ import javax.jms.TextMessage;
 import javax.transaction.Transactional;
 
 import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
-import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
 public class OrderEventsListener {
@@ -43,7 +42,7 @@ public class OrderEventsListener {
                     orderCreatedEvent.getUserId(),
                     orderCreatedEvent.getCartNumber());
 
-            eventService.sendOutgoingEvents(RESERVATION_CREATED_EVENT_QUEUE);
+            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Order Created Event handling: {}", orderCreatedEvent);
         } catch (Exception e) {

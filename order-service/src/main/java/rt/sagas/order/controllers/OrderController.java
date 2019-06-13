@@ -13,8 +13,6 @@ import rt.sagas.order.services.OrderService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
-
 @RestController("/orders")
 public class OrderController {
 
@@ -35,7 +33,7 @@ public class OrderController {
 
         Order orderCreated = orderService.createOrder(order);
 
-        eventService.sendOutgoingEvents(ORDER_CREATED_EVENT_QUEUE);
+        eventService.sendOutgoingEvents();
 
         return orderCreated;
     }

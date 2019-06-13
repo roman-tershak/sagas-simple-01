@@ -28,27 +28,29 @@ public class EventService {
     private EventSender eventSender;
 
     @Transactional(REQUIRED)
-    public void storeOutgoingEvent(SagaEvent event) throws Exception {
-        EventEntity eventEntity = new EventEntity(objectMapper.writeValueAsString(event));
-        eventRepository.save(eventEntity);
+    public void storeOutgoingEvent(String destination, SagaEvent event) throws Exception {
 
-        LOGGER.info("Event {} enqueued", event);
+        eventRepository.save(
+                new EventEntity(
+                        destination, objectMapper.writeValueAsString(event)));
+
+        LOGGER.info("Stored outgoing Event {} for {}", event, destination);
     }
 
     @Transactional(REQUIRES_NEW)
-    public void sendOutgoingEvents(String destination) {
+    public void sendOutgoingEvents() {
         AtomicInteger count = new AtomicInteger();
 
         eventRepository.findAll().forEach(eventEntity -> {
 
-            eventSender.sendEvent(destination, eventEntity.getEvent());
+            eventSender.sendEvent(eventEntity.getDestination(), eventEntity.getEvent());
             eventRepository.delete(eventEntity);
 
             count.incrementAndGet();
         });
 
         if (count.get() != 1) {
-            LOGGER.info("A batch of events {} sent to {}", count, destination);
+            LOGGER.info("A batch of events {} sent", count);
         }
     }
 }

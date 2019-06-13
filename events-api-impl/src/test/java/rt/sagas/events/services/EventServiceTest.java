@@ -39,7 +39,7 @@ public class EventServiceTest {
     @Test
     public void testTransactionEventIsStoredIntoDb() throws Exception {
         TestEvent event = new TestEvent("123456-1234-5678-ABCDEF");
-        unit.storeOutgoingEvent(event);
+        unit.storeOutgoingEvent(TEST_DESTINATION, event);
 
         assertThat(eventRepository.count(), is(1L));
         EventEntity eventEntity = eventRepository.findAll().iterator().next();
@@ -50,9 +50,9 @@ public class EventServiceTest {
 
     @Test
     public void testTransactionEventIsSentToTheQueue() throws Exception {
-        unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-AAABBBB"));
+        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-AAABBBB"));
 
-        unit.sendOutgoingEvents(TEST_DESTINATION);
+        unit.sendOutgoingEvents();
 
         TestEvent cartAuthorizedEvent = cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAABBBB"), 10000L);
@@ -61,10 +61,10 @@ public class EventServiceTest {
 
     @Test
     public void testMoreThanOneTransactionEventsAreSentToTheQueue() throws Exception {
-        unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-AAAAAAA"));
-        unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-BBBBBBB"));
+        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-AAAAAAA"));
+        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-BBBBBBB"));
 
-        unit.sendOutgoingEvents(TEST_DESTINATION);
+        unit.sendOutgoingEvents();
 
         assertThat(cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAAAAAA"), 10000L),
@@ -76,11 +76,11 @@ public class EventServiceTest {
 
     @Test
     public void testSentEventsAreRemovedFromTheDb() throws Exception {
-        unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-CCCCCCC"));
-        unit.storeOutgoingEvent(new TestEvent("111111-1234-5678-DDDDDDD"));
+        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-CCCCCCC"));
+        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-DDDDDDD"));
         assertThat(eventRepository.count(), is(2L));
 
-        unit.sendOutgoingEvents(TEST_DESTINATION);
+        unit.sendOutgoingEvents();
 
         assertThat(eventRepository.count(), is(0L));
     }

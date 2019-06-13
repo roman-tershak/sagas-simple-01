@@ -5,7 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rt.sagas.events.CartAuthorizedEvent;
+import rt.sagas.events.QueueNames;
 import rt.sagas.events.ReservationConfirmedEvent;
+import rt.sagas.events.ReservationCreatedEvent;
 import rt.sagas.events.services.EventService;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
@@ -15,6 +17,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
+import static rt.sagas.events.QueueNames.*;
 import static rt.sagas.reservation.entities.ReservationStatus.CONFIRMED;
 import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
 
@@ -40,8 +43,10 @@ public class ReservationService {
             Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
             reservationRepository.save(reservation);
 
-            eventService.storeOutgoingEvent(new CartAuthorizedEvent(
-                    reservation.getId(), cartNumber, reservation.getOrderId(), reservation.getUserId()));
+            eventService.storeOutgoingEvent(
+                    RESERVATION_CREATED_EVENT_QUEUE,
+                    new ReservationCreatedEvent(
+                            reservation.getId(), reservation.getOrderId(), reservation.getUserId(), cartNumber));
 
             LOGGER.info("Reservation {} created", reservation);
         } else {
@@ -68,8 +73,10 @@ public class ReservationService {
             reservation.setStatus(CONFIRMED);
             reservationRepository.save(reservation);
 
-            eventService.storeOutgoingEvent(new ReservationConfirmedEvent(
-                    reservation.getId(), reservation.getOrderId(), reservation.getUserId()));
+            eventService.storeOutgoingEvent(
+                    RESERVATION_CONFIRMED_EVENT_QUEUE,
+                    new ReservationConfirmedEvent(
+                            reservation.getId(), reservation.getOrderId(), reservation.getUserId()));
 
             LOGGER.info("Reservation {} confirmed", reservation);
         } else {

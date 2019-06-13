@@ -15,7 +15,6 @@ import rt.sagas.events.services.EventService;
 import javax.jms.TextMessage;
 import javax.transaction.Transactional;
 
-import static rt.sagas.events.QueueNames.CART_AUTHORIZED_EVENT_QUEUE;
 import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
@@ -45,7 +44,7 @@ public class ReservationEventsListener {
                     reservationCreatedEvent.getUserId(),
                     reservationCreatedEvent.getCartNumber());
 
-            eventService.sendOutgoingEvents(CART_AUTHORIZED_EVENT_QUEUE);
+            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
         } catch (Exception e) {
