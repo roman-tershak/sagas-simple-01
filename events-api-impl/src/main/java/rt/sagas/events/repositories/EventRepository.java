@@ -6,4 +6,6 @@ import rt.sagas.events.entities.EventEntity;
 
 @Repository
 public interface EventRepository extends CrudRepository<EventEntity, Long> {
+
+    void deleteByIdIn(Iterable<Long> iterable);
 }

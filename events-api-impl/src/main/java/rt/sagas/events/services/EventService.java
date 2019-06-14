@@ -4,16 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import rt.sagas.events.SagaEvent;
 import rt.sagas.events.entities.EventEntity;
 import rt.sagas.events.repositories.EventRepository;
 
 import javax.transaction.Transactional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
-import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @Service
 public class EventService {
@@ -37,20 +40,33 @@ public class EventService {
         LOGGER.info("Stored outgoing Event {} for {}", event, destination);
     }
 
-    @Transactional(REQUIRES_NEW)
+//    @Transactional(REQUIRES_NEW)
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = Propagation.REQUIRES_NEW,
+            isolation = Isolation.REPEATABLE_READ,
+            noRollbackFor = ObjectOptimisticLockingFailureException.class
+    )
     public void sendOutgoingEvents() {
-        AtomicInteger count = new AtomicInteger();
+        List<Long> eventIds = new ArrayList<>();
 
         eventRepository.findAll().forEach(eventEntity -> {
 
             eventSender.sendEvent(eventEntity.getDestination(), eventEntity.getEvent());
-            eventRepository.delete(eventEntity);
-
-            count.incrementAndGet();
+//            eventRepository.delete(eventEntity);
+            eventIds.add(eventEntity.getId());
         });
+        int batchSize = eventIds.size();
+        if (batchSize > 0) {
+            try {
+                eventRepository.deleteByIdIn(eventIds);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                LOGGER.error("DB conflict occurred", e);
+                throw e;
+            }
+        }
 
-        if (count.get() != 1) {
-            LOGGER.info("A batch of events {} sent", count);
+        if (batchSize != 1) {
+            LOGGER.info("A batch of {} events sent", batchSize);
         }
     }
 }
