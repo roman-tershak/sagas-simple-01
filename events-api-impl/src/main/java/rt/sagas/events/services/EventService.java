@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import rt.sagas.events.SagaEvent;
 import rt.sagas.events.entities.EventEntity;
 import rt.sagas.events.repositories.EventRepository;
@@ -12,10 +15,8 @@ import rt.sagas.events.repositories.EventRepository;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
-import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @Service
 public class EventService {
@@ -39,7 +40,11 @@ public class EventService {
         LOGGER.info("Stored outgoing Event {} for {}", event, destination);
     }
 
-    @Transactional(REQUIRES_NEW)
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = Propagation.REQUIRES_NEW,
+            isolation = Isolation.REPEATABLE_READ,
+            noRollbackFor = ObjectOptimisticLockingFailureException.class
+    )
     public void sendOutgoingEvents() {
         List<Long> ids = new ArrayList<>();
 

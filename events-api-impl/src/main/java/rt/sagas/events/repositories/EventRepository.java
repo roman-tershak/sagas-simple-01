@@ -7,8 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rt.sagas.events.entities.EventEntity;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import java.util.List;
 
 @Repository
