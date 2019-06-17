@@ -10,6 +10,8 @@ import rt.sagas.events.entities.EventEntity;
 import rt.sagas.events.repositories.EventRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
@@ -39,18 +41,21 @@ public class EventService {
 
     @Transactional(REQUIRES_NEW)
     public void sendOutgoingEvents() {
-        AtomicInteger count = new AtomicInteger();
+        List<Long> ids = new ArrayList<>();
 
         eventRepository.findAll().forEach(eventEntity -> {
 
             eventSender.sendEvent(eventEntity.getDestination(), eventEntity.getEvent());
-            eventRepository.delete(eventEntity);
-
-            count.incrementAndGet();
+            ids.add(eventEntity.getId());
         });
 
-        if (count.get() != 1) {
-            LOGGER.info("A batch of events {} sent", count);
+        int idsCount = ids.size();
+        if (idsCount > 0) {
+            eventRepository.deleteByIds(ids);
+        }
+
+        if (idsCount != 1) {
+            LOGGER.info("A batch of events {} sent", idsCount);
         }
     }
 }

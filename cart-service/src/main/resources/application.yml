@@ -3,7 +3,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       connection-test-query: SELECT 1;
-      maximum-pool-size: 20
+      maximum-pool-size: 40
       minimum-idle: 2
 #    url: jdbc:mariadb://mariadbsrv:3306/sagasimple1
 #    username: sagau
@@ -12,7 +12,7 @@ spring:
   activemq:
     pool:
       enabled: true
-      max-connections: 20
+      max-connections: 40
     packages:
       trust-all: true
 #    broker-url: tcp://activemqsrv:61616
