@@ -42,7 +42,7 @@ public class EventService {
 
     @org.springframework.transaction.annotation.Transactional(
             propagation = Propagation.REQUIRES_NEW,
-            isolation = Isolation.REPEATABLE_READ,
+            isolation = Isolation.SERIALIZABLE,
             noRollbackFor = ObjectOptimisticLockingFailureException.class
     )
     public void sendOutgoingEvents() {
