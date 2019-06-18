@@ -8,4 +8,4 @@ docker run --name reservation-service ^
     -e SPRING_JMS_REDELIVERY_POLICY_MAXIMUM_REDELIVERIES=300 ^
     -e JAVA_TOOL_OPTIONS=\"-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n\" ^
     -p 8000:8000 ^
-    saga-tests-simple-1/reservation-service:1.0-NEST-TRANS
+    saga-tests-simple-1/reservation-service:1.0-EVENT-LOOP

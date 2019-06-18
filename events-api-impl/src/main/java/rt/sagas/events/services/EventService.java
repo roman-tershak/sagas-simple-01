@@ -58,9 +58,6 @@ public class EventService {
         if (idsCount > 0) {
             eventRepository.deleteByIds(ids);
         }
-
-        if (idsCount != 1) {
-            LOGGER.info("A batch of events {} sent", idsCount);
-        }
+        LOGGER.info("A number of events {} sent", idsCount);
     }
 }

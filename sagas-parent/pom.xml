@@ -6,7 +6,7 @@
 
     <groupId>rt.sagas</groupId>
     <artifactId>sagas-parent</artifactId>
-    <version>1.0-NEST-TRANS</version>
+    <version>1.0-EVENT-LOOP</version>
     <packaging>pom</packaging>
     <modules>
         <module>../events-api</module>
@@ -49,12 +49,12 @@
             <dependency>
                 <groupId>rt.sagas</groupId>
                 <artifactId>events-api</artifactId>
-                <version>1.0-NEST-TRANS</version>
+                <version>1.0-EVENT-LOOP</version>
             </dependency>
             <dependency>
                 <groupId>rt.sagas</groupId>
                 <artifactId>events-api-impl</artifactId>
-                <version>1.0-NEST-TRANS</version>
+                <version>1.0-EVENT-LOOP</version>
             </dependency>
 
             <dependency>
@@ -110,7 +110,7 @@
             <dependency>
                 <groupId>rt.sagas</groupId>
                 <artifactId>test-utils</artifactId>
-                <version>1.0-NEST-TRANS</version>
+                <version>1.0-EVENT-LOOP</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

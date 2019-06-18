@@ -10,7 +10,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import rt.sagas.cart.services.TransactionService;
 import rt.sagas.events.ReservationCreatedEvent;
-import rt.sagas.events.services.EventService;
 
 import javax.jms.TextMessage;
 import javax.transaction.Transactional;
@@ -24,8 +23,6 @@ public class ReservationEventsListener {
 
     @Autowired
     private TransactionService transactionService;
-    @Autowired
-    private EventService eventService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -43,8 +40,6 @@ public class ReservationEventsListener {
                     reservationCreatedEvent.getOrderId(),
                     reservationCreatedEvent.getUserId(),
                     reservationCreatedEvent.getCartNumber());
-
-            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Reservation Created Event handling: {}", reservationCreatedEvent);
         } catch (Exception e) {

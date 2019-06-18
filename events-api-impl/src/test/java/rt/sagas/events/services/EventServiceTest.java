@@ -52,19 +52,15 @@ public class EventServiceTest {
     public void testTransactionEventIsSentToTheQueue() throws Exception {
         unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-AAABBBB"));
 
-        unit.sendOutgoingEvents();
-
         TestEvent cartAuthorizedEvent = cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAABBBB"), 10000L);
         assertThat(cartAuthorizedEvent, is(notNullValue()));
     }
 
     @Test
-    public void testMoreThanOneTransactionEventsAreSentToTheQueue() throws Exception {
+    public void testMoreThanOneTransactionEventsAreSentToTheQueueAndEventsAreRemovedFromTheDb() throws Exception {
         unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-AAAAAAA"));
         unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-BBBBBBB"));
-
-        unit.sendOutgoingEvents();
 
         assertThat(cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-AAAAAAA"), 10000L),
@@ -72,16 +68,8 @@ public class EventServiceTest {
         assertThat(cartAuthorizedEventReceiver.pollEvent(
                 e -> e.getEventMessage().equals("111111-1234-5678-BBBBBBB"), 10000L),
                 is(notNullValue()));
-    }
-
-    @Test
-    public void testSentEventsAreRemovedFromTheDb() throws Exception {
-        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-CCCCCCC"));
-        unit.storeOutgoingEvent(TEST_DESTINATION, new TestEvent("111111-1234-5678-DDDDDDD"));
-        assertThat(eventRepository.count(), is(2L));
-
-        unit.sendOutgoingEvents();
 
         assertThat(eventRepository.count(), is(0L));
     }
+
 }

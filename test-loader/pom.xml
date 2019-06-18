@@ -7,12 +7,12 @@
     <parent>
         <artifactId>sagas-parent</artifactId>
         <groupId>rt.sagas</groupId>
-        <version>1.0-NEST-TRANS</version>
+        <version>1.0-EVENT-LOOP</version>
         <relativePath>../sagas-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>test-loader</artifactId>
-    <version>1.0-NEST-TRANS</version>
+    <version>1.0-EVENT-LOOP</version>
     <packaging>pom</packaging>
 
     <build>

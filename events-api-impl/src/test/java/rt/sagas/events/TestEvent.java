@@ -14,4 +14,12 @@ public class TestEvent extends SagaEvent {
     public String getEventMessage() {
         return eventMessage;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TestEvent{");
+        sb.append("eventMessage='").append(eventMessage).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

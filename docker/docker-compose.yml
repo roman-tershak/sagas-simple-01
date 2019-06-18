@@ -44,7 +44,7 @@ services:
       retries: 10
 
   order-service:
-    image: saga-tests-simple-1/order-service:1.0-NEST-TRANS
+    image: saga-tests-simple-1/order-service:1.0-EVENT-LOOP
     container_name: order-service
     depends_on:
       mariadb-service:
@@ -72,7 +72,7 @@ services:
       retries: 10
 
   reservation-service:
-    image: saga-tests-simple-1/reservation-service:1.0-NEST-TRANS
+    image: saga-tests-simple-1/reservation-service:1.0-EVENT-LOOP
     container_name: reservation-service
     depends_on:
       mariadb-service:
@@ -100,7 +100,7 @@ services:
       retries: 10
 
   cart-service:
-    image: saga-tests-simple-1/cart-service:1.0-NEST-TRANS
+    image: saga-tests-simple-1/cart-service:1.0-EVENT-LOOP
     container_name: cart-service
     depends_on:
       mariadb-service:

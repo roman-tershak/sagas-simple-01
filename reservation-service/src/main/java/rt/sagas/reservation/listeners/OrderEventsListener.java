@@ -8,7 +8,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import rt.sagas.events.OrderCreatedEvent;
-import rt.sagas.events.services.EventService;
 import rt.sagas.reservation.services.ReservationService;
 
 import javax.jms.TextMessage;
@@ -23,8 +22,6 @@ public class OrderEventsListener {
 
     @Autowired
     private ReservationService reservationService;
-    @Autowired
-    private EventService eventService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -41,8 +38,6 @@ public class OrderEventsListener {
                     orderCreatedEvent.getOrderId(),
                     orderCreatedEvent.getUserId(),
                     orderCreatedEvent.getCartNumber());
-
-            eventService.sendOutgoingEvents();
 
             LOGGER.info("About to complete Order Created Event handling: {}", orderCreatedEvent);
         } catch (Exception e) {

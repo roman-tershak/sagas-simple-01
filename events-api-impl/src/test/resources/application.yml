@@ -11,3 +11,7 @@ logging:
   level:
     org.hibernate:
       SQL: DEBUG
+
+application:
+  event-loop-scheduler:
+    fixed-delay-ms: 2000

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import rt.sagas.events.services.EventService;
 import rt.sagas.order.entities.Order;
 import rt.sagas.order.services.OrderService;
 
@@ -20,8 +19,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private EventService eventService;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,8 +29,6 @@ public class OrderController {
         LOGGER.info("Create Order called: {}", order);
 
         Order orderCreated = orderService.createOrder(order);
-
-        eventService.sendOutgoingEvents();
 
         return orderCreated;
     }
