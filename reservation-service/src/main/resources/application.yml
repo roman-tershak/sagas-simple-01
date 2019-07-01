@@ -3,26 +3,33 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       connection-test-query: SELECT 1;
-      maximum-pool-size: 20
+      maximum-pool-size: 40
       minimum-idle: 2
-#    url: jdbc:mariadb://mariadbsrv:3306/sagasimple1
+#    url: jdbc:mariadb://mariadb-service:3306/sagasimple1
 #    username: sagau
 #    password: sagahtgrfe
 
   activemq:
     pool:
       enabled: true
-      max-connections: 20
+      max-connections: 40
     packages:
       trust-all: true
-#    broker-url: tcp://activemqsrv:61616
+#    broker-url: tcp://activemq-service:61616
 #    user: admin
 #    password: admin
 
   jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    show-sql: false
     hibernate:
       ddl-auto: update
 
   jms:
     template:
       time-to-live: 1h
+      qos-enabled: true
+#    redelivery-policy:
+#      maximum-redeliveries: 100
+#      redelivery-delay: 1000
+#      initial-redelivery-delay: 5000

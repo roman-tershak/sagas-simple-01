@@ -7,12 +7,12 @@
     <parent>
         <artifactId>sagas-parent</artifactId>
         <groupId>rt.sagas</groupId>
-        <version>1.0-NEST-TRANS</version>
+        <version>1.0-ONE-COM-TRAN</version>
         <relativePath>../sagas-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>order-service</artifactId>
-    <version>1.0-NEST-TRANS</version>
+    <version>1.0-ONE-COM-TRAN</version>
     <packaging>jar</packaging>
 
     <dependencies>

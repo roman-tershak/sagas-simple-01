@@ -4,10 +4,10 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import rt.sagas.reservation.entities.Reservation;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends CrudRepository<Reservation, String> {
 
-    List<Reservation> findAllByOrderId(Long orderId);
+    Optional<Reservation> findByOrderId(Long orderId);
 }

@@ -9,6 +9,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String cartNumber;
+    @Column(unique = true)
     private Long orderId;
     private Long userId;
     @Enumerated(EnumType.STRING)

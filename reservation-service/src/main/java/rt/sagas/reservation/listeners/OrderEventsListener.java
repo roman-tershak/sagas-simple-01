@@ -14,7 +14,7 @@ import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
 import javax.transaction.Transactional;
-import java.util.List;
+import java.util.Optional;
 
 import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
 import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
@@ -40,8 +40,8 @@ public class OrderEventsListener {
         Long orderId = orderCreatedEvent.getOrderId();
         Long userId = orderCreatedEvent.getUserId();
 
-        List<Reservation> reservationsByOrderId = reservationRepository.findAllByOrderId(orderId);
-        if (reservationsByOrderId.size() == 0) {
+        Optional<Reservation> reservationsByOrderId = reservationRepository.findByOrderId(orderId);
+        if (!reservationsByOrderId.isPresent()) {
             Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
             reservationRepository.save(reservation);
 

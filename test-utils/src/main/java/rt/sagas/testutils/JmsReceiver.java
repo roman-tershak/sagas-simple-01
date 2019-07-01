@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 
 public abstract class JmsReceiver<E extends SagaEvent> {
 
+    public static final long DEFAULT_TIMEOUT = 10000L;
+
     private LinkedBlockingQueue<E> events = new LinkedBlockingQueue<>();
 
     public abstract void receiveMessage(E event);
@@ -18,7 +20,7 @@ public abstract class JmsReceiver<E extends SagaEvent> {
     }
 
     public E pollEvent() throws InterruptedException {
-        return pollEvent(10000L);
+        return pollEvent(DEFAULT_TIMEOUT);
     }
 
     public E pollEvent(long timeout) throws InterruptedException {
@@ -26,7 +28,7 @@ public abstract class JmsReceiver<E extends SagaEvent> {
     }
 
     public E pollEvent(Predicate<E> predicate) throws InterruptedException {
-        return pollEvent(predicate, 10000L);
+        return pollEvent(predicate, DEFAULT_TIMEOUT);
     }
 
     public E pollEvent(Predicate<E> predicate, long timeout) throws InterruptedException {

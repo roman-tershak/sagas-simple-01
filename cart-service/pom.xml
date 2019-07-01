@@ -7,15 +7,19 @@
     <parent>
         <artifactId>sagas-parent</artifactId>
         <groupId>rt.sagas</groupId>
-        <version>1.0-NEST-TRANS</version>
+        <version>1.0-ONE-COM-TRAN</version>
         <relativePath>../sagas-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>cart-service</artifactId>
-    <version>1.0-NEST-TRANS</version>
+    <version>1.0-ONE-COM-TRAN</version>
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>

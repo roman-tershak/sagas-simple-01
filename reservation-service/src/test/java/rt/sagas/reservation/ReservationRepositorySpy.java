@@ -4,7 +4,6 @@ import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
 import rt.sagas.testutils.TestRuntimeException;
 
-import java.util.List;
 import java.util.Optional;
 
 public class ReservationRepositorySpy implements ReservationRepository {
@@ -50,8 +49,8 @@ public class ReservationRepositorySpy implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByOrderId(Long orderId) {
-        return reservationRepository.findAllByOrderId(orderId);
+    public Optional<Reservation> findByOrderId(Long orderId) {
+        return reservationRepository.findByOrderId(orderId);
     }
 
     @Override
