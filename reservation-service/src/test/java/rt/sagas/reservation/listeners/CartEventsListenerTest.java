@@ -8,9 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import rt.sagas.events.CartAuthorizedEvent;
 import rt.sagas.events.ReservationConfirmedEvent;
-import rt.sagas.events.ReservationErrorEvent;
 import rt.sagas.reservation.JmsReservationConfirmedEventReceiver;
-import rt.sagas.reservation.JmsReservationErrorEventReceiver;
 import rt.sagas.reservation.ReservationRepositorySpy;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
@@ -38,8 +36,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     private JmsSender jmsSender;
     @Autowired
     private JmsReservationConfirmedEventReceiver reservationConfirmedEventReceiver;
-    @Autowired
-    private JmsReservationErrorEventReceiver reservationErrorEventReceiver;
 
     @After
     public void setUp() {
@@ -51,7 +47,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
         reservationRepositorySpy.setThrowExceptionInSave(false);
         super.tearDown();
         reservationConfirmedEventReceiver.clear();
-        reservationErrorEventReceiver.clear();
     }
 
     @Test
@@ -80,30 +75,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
     }
 
     @Test
-    public void testReservationErrorEventIsSentWhenNoPendingReservationIsFound() throws Exception {
-        Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
-        reservationRepository.save(pendingReservation);
-        String reservationId = pendingReservation.getId();
-
-        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
-                "not-existing-reservation",
-                CART_NUMBER, ORDER_ID, USER_ID);
-        jmsSender.send(CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
-
-        assertThat(reservationConfirmedEventReceiver.pollEvent(
-                e -> e.getReservationId().equals(reservationId), 5000L), is(nullValue()));
-
-        ReservationErrorEvent reservationErrorEvent = reservationErrorEventReceiver.pollEvent(
-                e -> e.getReservationId().equals("not-existing-reservation"), 5000L);
-        assertThat(reservationErrorEvent, is(notNullValue()));
-        assertThat(reservationErrorEvent.getReservationId(), is("not-existing-reservation"));
-        assertThat(reservationErrorEvent.getOrderId(), is(ORDER_ID));
-        assertThat(reservationErrorEvent.getUserId(), is(USER_ID));
-        assertThat(reservationErrorEvent.getCartNumber(), is(CART_NUMBER));
-        assertThat(reservationErrorEvent.getMessage(), containsString("The Reservation 'not-existing-reservation' does not exist"));
-    }
-
-    @Test
     public void testReservationConfirmedEventIsNotSentWhenExceptionOccurs() throws Exception {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);
@@ -118,7 +89,6 @@ public class CartEventsListenerTest extends AbstractListenerTest {
 
         assertThat(reservationConfirmedEventReceiver.pollEvent(
                 e -> e.getReservationId().equals(reservationId), 5000L), is(nullValue()));
-        assertThat(reservationErrorEventReceiver.pollEvent(1000L), is(nullValue()));
 
         Reservation reservation = waitAndGetReservationsByIdAndStatusFromDb(
                 reservationId, PENDING, 0);

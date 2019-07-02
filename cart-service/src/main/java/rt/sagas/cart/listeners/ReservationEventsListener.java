@@ -17,6 +17,8 @@ import rt.sagas.events.ReservationCreatedEvent;
 
 import javax.transaction.Transactional;
 
+import java.util.Optional;
+
 import static rt.sagas.events.QueueNames.RESERVATION_CREATED_EVENT_QUEUE;
 
 @Component
@@ -39,10 +41,16 @@ public class ReservationEventsListener {
         Long userId = reservationCreatedEvent.getUserId();
         String cartNumber = reservationCreatedEvent.getCartNumber();
 
-        Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
-        transactionRepository.save(transaction);
+        Optional<Transaction> byOrderId = transactionRepository.findByOrderId(orderId);
+        if (!byOrderId.isPresent()) {
+            Transaction transaction = new Transaction(cartNumber, orderId, userId, TransactionStatus.AUTHORIZED);
+            transactionRepository.save(transaction);
+        } else {
+            LOGGER.warn("Transaction {} has already been created", byOrderId.get());
+        }
 
-        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(reservationId, cartNumber, orderId, userId);
+        CartAuthorizedEvent cartAuthorizedEvent = new CartAuthorizedEvent(
+                reservationId, cartNumber, orderId, userId);
         jmsTemplate.convertAndSend(QueueNames.CART_AUTHORIZED_EVENT_QUEUE, cartAuthorizedEvent);
 
         LOGGER.info("Cart Authorized Event sent: {}", cartAuthorizedEvent);

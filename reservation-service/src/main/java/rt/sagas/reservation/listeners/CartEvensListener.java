@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import rt.sagas.events.CartAuthorizedEvent;
 import rt.sagas.events.QueueNames;
 import rt.sagas.events.ReservationConfirmedEvent;
-import rt.sagas.events.ReservationErrorEvent;
 import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.repositories.ReservationRepository;
 
@@ -44,32 +43,15 @@ public class CartEvensListener {
             reservation.setStatus(CONFIRMED);
             reservationRepository.save(reservation);
 
-            sendReservationConfirmedEvent(reservation);
+            ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
+                    reservation.getId(), reservation.getOrderId(), reservation.getUserId());
+
+            jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE,
+                    reservationConfirmedEvent);
+
+            LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
         } else {
-            handleReservationMissedError(cartAuthorizedEvent);
+            LOGGER.error("Reservation with id '{}' does not exist", reservationId);
         }
-    }
-
-    private void sendReservationConfirmedEvent(Reservation reservation) {
-        ReservationConfirmedEvent reservationConfirmedEvent = new ReservationConfirmedEvent(
-                reservation.getId(), reservation.getOrderId(), reservation.getUserId());
-
-        jmsTemplate.convertAndSend(QueueNames.RESERVATION_CONFIRMED_EVENT_QUEUE, reservationConfirmedEvent);
-
-        LOGGER.info("Reservation Confirmed Event sent: {}", reservationConfirmedEvent);
-    }
-
-    private void handleReservationMissedError(CartAuthorizedEvent cartAuthorizedEvent) {
-        String reservationId = cartAuthorizedEvent.getReservationId();
-
-        ReservationErrorEvent reservationErrorEvent = new ReservationErrorEvent(
-                reservationId,
-                cartAuthorizedEvent.getOrderId(),
-                cartAuthorizedEvent.getUserId(),
-                cartAuthorizedEvent.getCartNumber(),
-                "The Reservation '" + reservationId + "' does not exist");
-        jmsTemplate.convertAndSend(QueueNames.RESERVATION_ERROR_EVENT_QUEUE, reservationErrorEvent);
-
-        LOGGER.error("Reservation Error Event sent: {}", reservationErrorEvent);
     }
 }

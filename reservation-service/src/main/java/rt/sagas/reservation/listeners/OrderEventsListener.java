@@ -40,19 +40,24 @@ public class OrderEventsListener {
         Long orderId = orderCreatedEvent.getOrderId();
         Long userId = orderCreatedEvent.getUserId();
 
+        String reservationId;
         Optional<Reservation> reservationsByOrderId = reservationRepository.findByOrderId(orderId);
         if (!reservationsByOrderId.isPresent()) {
-            Reservation reservation = reservationFactory.createNewPendingReservationFor(orderId, userId);
-            reservationRepository.save(reservation);
 
-            ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
-                    reservation.getId(), orderId, userId, orderCreatedEvent.getCartNumber());
+            Reservation reservation = reservationRepository.save(
+                    reservationFactory.createNewPendingReservationFor(orderId, userId));
 
-            jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
-
-            LOGGER.info("Reservation Created Event sent: {}", reservationCreatedEvent);
+            LOGGER.info("Reservation created: {}", reservation);
+            reservationId = reservation.getId();
         } else {
-            LOGGER.error("Reservations for Order Id {} has already been created", orderId);
+            LOGGER.warn("Reservations for Order Id {} has already been created", orderId);
+            reservationId = reservationsByOrderId.get().getId();
         }
+
+        ReservationCreatedEvent reservationCreatedEvent = new ReservationCreatedEvent(
+                reservationId, orderId, userId, orderCreatedEvent.getCartNumber());
+        jmsTemplate.convertAndSend(RESERVATION_CREATED_EVENT_QUEUE, reservationCreatedEvent);
+
+        LOGGER.info("Reservation Created Event sent: {}", reservationCreatedEvent);
     }
 }

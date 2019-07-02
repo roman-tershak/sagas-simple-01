@@ -13,9 +13,8 @@ import rt.sagas.reservation.entities.Reservation;
 import rt.sagas.reservation.entities.ReservationFactory;
 import rt.sagas.testutils.JmsSender;
 
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static rt.sagas.events.QueueNames.ORDER_CREATED_EVENT_QUEUE;
 import static rt.sagas.reservation.entities.ReservationStatus.PENDING;
@@ -43,8 +42,8 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
 
     @Test
     public void testPendingReservationIsCreatedAndReservationCreatedEventIsSentOnOrderCreatedEvent() throws Exception {
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER);
-        jmsSender.send(ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
+        jmsSender.send(ORDER_CREATED_EVENT_QUEUE,
+                new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER));
 
         Reservation reservation = waitAndGetReservationsByOrderIdAndStatusFromDb(
                 ORDER_ID, PENDING, 10000L);
@@ -52,7 +51,7 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
         assertThat(reservation.getUserId(), is(USER_ID));
 
         ReservationCreatedEvent reservationCreatedEvent = reservationCreatedEventReceiver.pollEvent(
-                e -> e.getOrderId().equals(reservation.getOrderId()),10000L);
+                e -> e.getOrderId().equals(ORDER_ID));
         assertThat(reservationCreatedEvent, is(notNullValue()));
         assertThat(reservationCreatedEvent.getReservationId(), is(reservation.getId()));
         assertThat(reservationCreatedEvent.getOrderId(), is(ORDER_ID));
@@ -65,16 +64,16 @@ public class OrderEventsListenerTest extends AbstractListenerTest {
         Reservation pendingReservation = reservationFactory.createNewPendingReservationFor(ORDER_ID, USER_ID);
         reservationRepository.save(pendingReservation);
 
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER);
-        jmsSender.send(ORDER_CREATED_EVENT_QUEUE, orderCreatedEvent);
+        jmsSender.send(ORDER_CREATED_EVENT_QUEUE,
+                new OrderCreatedEvent(ORDER_ID, USER_ID, CART_NUMBER));
 
         ReservationCreatedEvent reservationCreatedEvent = reservationCreatedEventReceiver.pollEvent(
-                e -> e.getOrderId().equals(ORDER_ID), 10000L);
-        assertThat(reservationCreatedEvent, is(nullValue()));
+                e -> e.getOrderId().equals(ORDER_ID));
+        assertThat(reservationCreatedEvent, is(notNullValue()));
 
-        Optional<Reservation> byOrderId = reservationRepository.findByOrderId(ORDER_ID);
-        assertThat(byOrderId.isPresent(), is(true));
-        Reservation reservationFromDb = byOrderId.get();
+        Reservation reservationFromDb = waitAndGetReservationsByOrderIdAndStatusFromDb(
+                ORDER_ID, PENDING, 10000L);
+        assertThat(reservationFromDb, is(notNullValue()));
         assertThat(reservationFromDb.getId(), is(pendingReservation.getId()));
         assertThat(reservationFromDb.getOrderId(), is(pendingReservation.getOrderId()));
         assertThat(reservationFromDb.getUserId(), is(pendingReservation.getUserId()));
