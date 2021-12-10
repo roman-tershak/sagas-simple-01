@@ -30,7 +30,7 @@
         <mariadb.client.version>2.4.0</mariadb.client.version>
 
         <jackson.version>2.9.8</jackson.version>
-        <log4j.version>2.11.2</log4j.version>
+        <log4j.version>2.15.0</log4j.version>
 
         <h2.version>1.4.198</h2.version>
 
